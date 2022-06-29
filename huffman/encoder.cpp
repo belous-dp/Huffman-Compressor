@@ -8,7 +8,7 @@
 #include <iostream>
 #include <queue>
 
-encoder::encoder() : frequency({}), codes({}), tree(nullptr) {
+encoder::encoder() : codes({}), frequency({}), tree(nullptr) {
   if (!std::is_unsigned_v<word>) {
     std::cerr << "word should be unsigned type" << std::endl;
     exit(0);
@@ -85,25 +85,35 @@ void encoder::build_tree() {
     tree = q.top();
     q.pop();
   }
-  build_codes(tree, {0, 0}, codes);
+  if (tree && !tree->left) { // заифаем случаи "ааааааа"
+    tree->left = new node(tree->chr);
+    tree->right = new node(tree->chr);
+  }
+  build_codes(tree, {0, 0});
 }
 
-void build_codes(encoder::node* root, cool_char cur,
-                          std::array<cool_char, encoder::WORD_MAX_VAL>& codes) {
+void encoder::build_codes(encoder::node* root, cool_char cur) {
   if (root) {
     if (root->left) {
       assert(root->right);
-      build_codes(root->left, cur.add_bit(0), codes);
-      build_codes(root->right, cur.add_bit(1), codes);
+      build_codes(root->left, cur.add_bit(0));
+      build_codes(root->right, cur.add_bit(1));
     } else {
       codes[root->chr] = cur;
     }
   }
 }
 
-void encoder::print_tree(std::ostream& output) {
+void encoder::print_metadata(std::ostream& output) {
   output_wrapper ow = output_wrapper(output);
   print_tree_dfs(tree, ow);
+  uint8_t nlast_bits = 0;
+  for (size_t i = 0; i < WORD_MAX_VAL; ++i) {
+    nlast_bits += frequency[i] * codes[i].nbits;
+  }
+  if (tree) {
+    ow << cool_char(nlast_bits, cool_char::WORD_WIDTH_WIDTH);
+  }
 }
 
 void encoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {

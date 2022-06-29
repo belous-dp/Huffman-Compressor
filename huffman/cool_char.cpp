@@ -6,13 +6,14 @@
 
 cool_char::cool_char() : cool_char(0, 0) {}
 
-cool_char::cool_char(cool_char::word data)
-    : cool_char(data << (WORD_WIDTH - 1), 1) {}
+cool_char::cool_char(cool_char::word data) : cool_char(data, 1) {}
 
 cool_char::cool_char(cool_char::word data, uint8_t nbits)
-    : data(data), nbits(nbits) {}
+    : data(data << (WORD_WIDTH - nbits)), nbits(nbits) {}
 
 cool_char cool_char::add_bit(uint8_t bit) {
-  return {static_cast<word>(data | bit << (WORD_WIDTH - nbits - 1)),
-          static_cast<uint8_t>(nbits + 1)};
+  cool_char res;
+  res.data = static_cast<word>(data | bit << (WORD_WIDTH - nbits - 1));
+  res.nbits = static_cast<uint8_t>(nbits + 1);
+  return res;
 }

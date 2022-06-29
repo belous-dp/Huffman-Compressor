@@ -13,12 +13,16 @@ input_wrapper& input_wrapper::operator>>(cool_char& res) {
   res.data = cc.data; // добавили то, что есть
   uint8_t delta;
   if (res.nbits > cc.nbits) {
-    assert(input);
+//    assert(input);
 //    if (!input) {
 //      std::cerr << "incorrect input request" << std::endl;
 //      exit(0);
 //    }
     cc.data = input.get(); // считали то, чего не хватает + какой-то хвост
+    if (!input) {
+      std::cerr << "incorrect input request" << std::endl;
+      exit(0);
+    }
     res.data |= cc.data >> cc.nbits; // добавили то, чего не хватает
     delta = res.nbits - cc.nbits;
     cc.nbits += WORD_WIDTH; // считали
@@ -34,4 +38,8 @@ input_wrapper& input_wrapper::operator>>(cool_char& res) {
 
 input_wrapper::operator bool() const {
   return input.operator bool() || cc.nbits > 0;
+}
+
+bool input_wrapper::eof() {
+  return input.peek() == std::char_traits<char>::eof();
 }

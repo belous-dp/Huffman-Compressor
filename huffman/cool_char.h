@@ -10,6 +10,7 @@
 struct cool_char {
   using word = uint8_t;
   static constexpr uint8_t WORD_WIDTH = sizeof(word) * CHAR_BIT;
+  static constexpr uint8_t WORD_WIDTH_WIDTH = 3;
   word data;
   uint8_t nbits;
   cool_char();

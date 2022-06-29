@@ -12,6 +12,7 @@ struct input_wrapper {
 
   input_wrapper& operator >>(cool_char& res);
   explicit operator bool() const;
+  bool eof();
 
 private:
   std::istream& input;

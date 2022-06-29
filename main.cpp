@@ -9,21 +9,22 @@
 #include <sstream>
 int main() {
   encoder enc = encoder();
-  std::string inp = "acbdcdd";
+//  std::string inp = "acbdcdd";
 //  std::string inp = "";
+  std::string inp = "aaaaa";
   std::stringstream inps1(inp);
   enc.process_input(inps1);
   enc.build_tree();
   enc.print_codes(std::cout);
   std::ofstream outps;
   outps.open("output.txt");
-  enc.print_tree(outps);
+  enc.print_metadata(outps);
   std::stringstream inps2(inp);
   enc.encode(inps2, outps);
   outps.close();
   std::ifstream inpf1("output.txt");
   decoder dec = decoder();
-  dec.scan_and_build_tree(inpf1);
+  dec.scan_metadata(inpf1);
   outps.open("output2.txt");
   dec.print_tree(outps);
   outps.close();

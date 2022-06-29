@@ -23,15 +23,15 @@ struct encoder {
   void process_input(word character);
 
   void build_tree();
-  void print_tree(std::ostream& output);
+  void print_metadata(std::ostream& output);
   void print_codes(std::ostream& output);
 
   void encode(std::istream& input, std::ostream& output);
 
 private:
   static constexpr word WORD_MAX_VAL = std::numeric_limits<uint8_t>::max();
-  std::array<size_t, WORD_MAX_VAL> frequency;
   std::array<cool_char, WORD_MAX_VAL> codes;
+  std::array<size_t, WORD_MAX_VAL> frequency;
 
   struct node {
     node* left;
@@ -44,8 +44,7 @@ private:
   };
   node* tree;
   friend void destroy_tree(node* root);
-  friend void build_codes(node* root, cool_char cur,
-                   std::array<cool_char, WORD_MAX_VAL>& codes);
+  void build_codes(node* root, cool_char cur);
   void print_tree_dfs(node* root, output_wrapper& out);
 };
 
