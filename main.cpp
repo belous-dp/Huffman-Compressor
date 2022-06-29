@@ -10,6 +10,7 @@
 int main() {
   encoder enc = encoder();
 //  std::string inp = "acbdcdd";
+//  std::string inp = "acbdcddddd";
 //  std::string inp = "";
   std::string inp = "aaaaa";
   std::stringstream inps1(inp);

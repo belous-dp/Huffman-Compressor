@@ -67,9 +67,9 @@ void decoder::decode(std::istream& input, std::ostream& output) {
 void decoder::print_tree(std::ostream& output) { // todo убрать
   output_wrapper ow = output_wrapper(output);
   print_tree_dfs(tree, ow);
-  output.flush();
-  output << nlast_bits;
-  output.flush();
+//  output.flush();
+//  output << nlast_bits;
+//  output.flush();
 }
 
 void decoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {

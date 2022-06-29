@@ -15,8 +15,9 @@ struct input_wrapper {
   bool eof();
 
 private:
-  std::istream& input;
   cool_char cc;
+  std::istream& input;
+  bool last_returned;
 };
 
 #endif // HUFFMAN_INPUT_WRAPPER_H

@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-input_wrapper::input_wrapper(std::istream& input) : input(input) {}
+input_wrapper::input_wrapper(std::istream& input) : cc({0, 0}), input(input), last_returned(false) {}
 
 input_wrapper& input_wrapper::operator>>(cool_char& res) {
   constexpr auto WORD_WIDTH = cool_char::WORD_WIDTH;
@@ -33,11 +33,12 @@ input_wrapper& input_wrapper::operator>>(cool_char& res) {
   res.data <<= (WORD_WIDTH - res.nbits); // занулили хвост, шаг 2
   cc.data <<= delta; // удалили из начала использованные биты
   cc.nbits -= res.nbits; // уменьшили на количество использованных
+  last_returned = res.nbits > 0;
   return *this;
 }
 
 input_wrapper::operator bool() const {
-  return input.operator bool() || cc.nbits > 0;
+  return input.operator bool() || cc.nbits > 0 || last_returned;
 }
 
 bool input_wrapper::eof() {
