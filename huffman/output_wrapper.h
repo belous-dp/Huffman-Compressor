@@ -6,6 +6,7 @@
 #define HUFFMAN_OUTPUT_WRAPPER_H
 
 #include "cool_char.h"
+#include "cool_sequence.h"
 #include <climits>
 #include <ostream>
 struct output_wrapper {
@@ -17,6 +18,7 @@ struct output_wrapper {
   ~output_wrapper();
 
   output_wrapper& operator <<(cool_char const& next);
+  output_wrapper& operator <<(cool_sequence const& next);
 
 private:
   std::ostream& output;

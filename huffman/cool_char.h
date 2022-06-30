@@ -18,7 +18,10 @@ struct cool_char {
   cool_char();
   cool_char(word bit);
   cool_char(word data, uint8_t nbits);
-  cool_char add_bit(uint8_t bit) const;
+  cool_char& add_bit(uint8_t bit);
+  cool_char& remove_bit();
+  friend bool operator ==(cool_char const& a, cool_char const& b);
+  friend bool operator !=(cool_char const& a, cool_char const& b);
 };
 
 #endif // HUFFMAN_COOL_CHAR_H

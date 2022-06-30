@@ -6,6 +6,7 @@
 #define HUFFMAN_ENCODER_H
 
 #include "cool_char.h"
+#include "cool_sequence.h"
 #include "output_wrapper.h"
 #include <array>
 #include <cstddef>
@@ -27,12 +28,12 @@ struct encoder {
   void build_tree();
   void print_metadata(std::ostream& output);
 
-  std::vector<cool_char> get_codes();
+  std::vector<cool_sequence> get_codes();
 
   void encode(std::istream& input, std::ostream& output);
 
 private:
-  std::array<cool_char, cool_char::WORD_MAX_VAL> codes;
+  std::array<cool_sequence, cool_char::WORD_MAX_VAL> codes;
   std::array<size_t, cool_char::WORD_MAX_VAL> frequency;
 
   void print_codes(std::ostream& output);
@@ -48,7 +49,7 @@ private:
   };
   node* tree;
   friend void destroy_tree(node* root);
-  void build_codes(node* root, cool_char cur);
+  void build_codes(node* root, cool_sequence& cur);
   void print_tree_dfs(node* root, output_wrapper& out);
 };
 

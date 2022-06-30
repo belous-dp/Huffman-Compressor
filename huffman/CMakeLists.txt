@@ -1,6 +1,6 @@
 set(LIB_NAME huffman)
 
-add_library(${LIB_NAME} STATIC cool_char.cpp encoder.cpp decoder.cpp input_wrapper.cpp output_wrapper.cpp)
+add_library(${LIB_NAME} STATIC cool_char.cpp encoder.cpp decoder.cpp input_wrapper.cpp output_wrapper.cpp cool_sequence.cpp cool_sequence.h)
 
 if (NOT MSVC)
     target_compile_options(${LIB_NAME} PRIVATE -Wall -Wno-sign-compare -pedantic)

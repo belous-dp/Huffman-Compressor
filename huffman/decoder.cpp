@@ -7,7 +7,7 @@
 #include <cassert>
 #include <iostream>
 
-decoder::decoder() : codes({}), tree(nullptr), nlast_bits(0) {}
+decoder::decoder() : tree(nullptr), nlast_bits(0) {}
 
 decoder::~decoder() {
   destroy_tree(tree);
@@ -22,7 +22,7 @@ void decoder::scan_metadata(std::istream& input) {
     if (!iw) {
       throw std::invalid_argument("metadata corrupted");
     }
-    nlast_bits = nlb.data >> (cool_char::WORD_WIDTH - nlb.nbits);
+    nlast_bits = nlb.data >> static_cast<uint8_t>(cool_char::WORD_WIDTH - nlb.nbits);
     if (nlast_bits == 0) {
       nlast_bits = cool_char::WORD_WIDTH;
     }
@@ -61,28 +61,6 @@ void decoder::decode(std::istream& input, std::ostream& output) {
   }
 }
 
-void decoder::print_tree(std::ostream& output) { // todo убрать
-  output_wrapper ow = output_wrapper(output);
-  print_tree_dfs(tree, ow);
-//  output.flush();
-//  output << nlast_bits;
-//  output.flush();
-}
-
-void decoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {
-  // идея: на внутренних вершинах выводим 0, на листьях -- 1 и код символа
-  if (root) {
-    if (root->left) {
-      assert(root->right);
-      out << 0;
-      print_tree_dfs(root->left, out);
-      print_tree_dfs(root->right, out);
-    } else {
-      out << 1 << cool_char(root->chr, cool_char::WORD_WIDTH);
-    }
-  }
-}
-
 void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
                          std::ostream& output) {
   if (!root->left) { // leaf
@@ -92,7 +70,10 @@ void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
     auto bit = cool_char(0);
     iw >> bit;
     if (!iw || (iw.eof() && nlast_bits == 0)) {
-      throw std::invalid_argument("invalid data");
+//      throw std::invalid_argument("invalid data");
+      output.flush();
+      std::cerr << "invalid data" << std::endl;
+      exit(0);
     }
     if (iw.eof()) {
       nlast_bits--;

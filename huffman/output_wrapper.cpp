@@ -10,16 +10,24 @@ output_wrapper::~output_wrapper() {
 
 output_wrapper& output_wrapper::operator<<(const cool_char& next) {
   constexpr auto WORD_WIDTH = cool_char::WORD_WIDTH;
-  cc.data |= next.data >> cc.nbits;
+  cc.data |= static_cast<cool_char::word>(next.data >> cc.nbits);
   if (cc.nbits + next.nbits > WORD_WIDTH) {
     output << static_cast<char>(cc.data);
-    cc.data = next.data << (WORD_WIDTH - cc.nbits);
+    cc.data = next.data << static_cast<uint8_t>(WORD_WIDTH - cc.nbits);
     //    nbits = next.nbits - (WORD_WIDTH - nbits); <=>
     //    nbits += next.nbits - WORD_WIDTH; <=>
     cc.nbits -= WORD_WIDTH - next.nbits;
   } else {
     cc.nbits += next.nbits;
   }
+  return *this;
+}
+
+output_wrapper& output_wrapper::operator<<(cool_sequence const& next) {
+  for (unsigned char i : next.seq) {
+    this->operator<<(i);
+  }
+  this->operator<<(next.last);
   return *this;
 }
 

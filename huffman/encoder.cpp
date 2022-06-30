@@ -86,15 +86,20 @@ void encoder::build_tree() {
     tree->left = new node(tree->chr);
     tree->right = new node(tree->chr);
   }
-  build_codes(tree, {0, 0});
+  cool_sequence cs;
+  build_codes(tree, cs);
 }
 
-void encoder::build_codes(encoder::node* root, cool_char cur) {
+void encoder::build_codes(encoder::node* root, cool_sequence& cur) {
   if (root) {
     if (root->left) {
       assert(root->right);
-      build_codes(root->left, cur.add_bit(0));
-      build_codes(root->right, cur.add_bit(1));
+      cur.add_bit(0);
+      build_codes(root->left, cur);
+      cur.remove_bit();
+      cur.add_bit(1);
+      build_codes(root->right, cur);
+      cur.remove_bit();
     } else {
       codes[root->chr] = cur;
     }
@@ -106,7 +111,7 @@ void encoder::print_metadata(std::ostream& output) {
   print_tree_dfs(tree, ow);
   uint8_t nlast_bits = 0;
   for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-    nlast_bits += frequency[i] * codes[i].nbits;
+    nlast_bits += frequency[i] * codes[i].get_nbits();
   }
   if (tree) {
     ow << cool_char(nlast_bits, cool_char::WORD_WIDTH_WIDTH);
@@ -128,15 +133,15 @@ void encoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {
 }
 
 void encoder::print_codes(std::ostream& output) {
-  output << "codes = {\n";
-  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-    output << "  " << i << " [";
-    for (int j = 0; j < codes[i].nbits; ++j) {
-      output << ((codes[i].data >> (cool_char::WORD_WIDTH - j - 1)) & 1);
-    }
-    output << "]\n";
-  }
-  output << "}\n";
+//  output << "codes = {\n";
+//  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
+//    output << "  " << i << " [";
+//    for (uint8_t j = 0; j < codes[i].nbits; ++j) {
+//      output << (static_cast<uint8_t>(codes[i].data >> (cool_char::WORD_WIDTH - j - 1U)) & 1U);
+//    }
+//    output << "]\n";
+//  }
+//  output << "}\n";
 }
 
 void encoder::encode(std::istream& input, std::ostream& output) {
@@ -149,6 +154,6 @@ void encoder::encode(std::istream& input, std::ostream& output) {
   }
 }
 
-std::vector<cool_char> encoder::get_codes() {
+std::vector<cool_sequence> encoder::get_codes() {
   return {codes.begin(), codes.end()};
 }
