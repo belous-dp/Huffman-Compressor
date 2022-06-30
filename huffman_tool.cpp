@@ -14,9 +14,9 @@ int main(int argc, char** argv) {
       "Tool for compressing and decompressing files with Huffman coding.",
       "Author: Danila Belous.");
   args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
-  args::Flag compress(parser, "compress", "compress mode", {"compress"});
+  args::Flag compress(parser, "compress", "compress mode", {'c', "compress"});
   args::Flag decompress(parser, "decompress", "decompress mode",
-                        {"decompress"});
+                        {'d', "decompress"});
   args::ValueFlag<std::string> input(parser, "path", "", {"input"});
   args::ValueFlag<std::string> output(parser, "path", "", {"output"});
   try {
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     std::ifstream inp = std::ifstream(args::get(input));
     std::ofstream outp = std::ofstream(args::get(output));
     if (!inp || !outp) {
-      throw std::invalid_argument("IOException");
+      throw std::invalid_argument("IOException: cannot open input/output files");
     }
     if (compress) {
       encoder enc = encoder();
@@ -48,10 +48,10 @@ int main(int argc, char** argv) {
     std::cout << parser;
   } catch (args::Error& e) {
     std::cerr << e.what() << std::endl << parser;
-    //    return 1;
+    return 1;
   } catch (std::invalid_argument& e) {
     std::cerr << e.what() << std::endl;
-    //    return 1;
+    return 1;
   }
   return 0;
   //  std::string inp = "acbdcdd";
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   //  std::ifstream inpf1("output.txt");
   //  decoder dec = decoder();
   //  dec.scan_metadata(inpf1);
-  //  outps.open("output2.txt");
+  //  outps.open("init_data.txt");
   //  dec.print_tree(outps);
   //  outps.close();
   //  dec.decode(inpf1, std::cout);
