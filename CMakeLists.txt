@@ -38,5 +38,5 @@ endif ()
 
 find_package(GTest REQUIRED)
 #find_package(args REQUIRED)
-target_link_libraries(${APP_EXE} PRIVATE huffman GTest::gtest GTest::gtest_main)
-#target_link_libraries(${APP_EXE} PRIVATE huffman taywee::args)
+target_link_libraries(${APP_EXE} PRIVATE ${LIB_NAME} GTest::gtest GTest::gtest_main)
+#target_link_libraries(${APP_EXE} PRIVATE ${LIB_NAME} taywee::args)

@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <istream>
 #include <limits>
+#include <vector>
+
 struct encoder {
   friend struct decoder;
   using word = cool_char::word;
@@ -24,14 +26,16 @@ struct encoder {
 
   void build_tree();
   void print_metadata(std::ostream& output);
-  void print_codes(std::ostream& output);
+
+  std::vector<cool_char> get_codes();
 
   void encode(std::istream& input, std::ostream& output);
 
 private:
-  static constexpr word WORD_MAX_VAL = std::numeric_limits<uint8_t>::max();
-  std::array<cool_char, WORD_MAX_VAL> codes;
-  std::array<size_t, WORD_MAX_VAL> frequency;
+  std::array<cool_char, cool_char::WORD_MAX_VAL> codes;
+  std::array<size_t, cool_char::WORD_MAX_VAL> frequency;
+
+  void print_codes(std::ostream& output);
 
   struct node {
     node* left;

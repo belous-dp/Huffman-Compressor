@@ -21,7 +21,7 @@ struct decoder {
 
 
 private:
-  std::array<cool_char, encoder::WORD_MAX_VAL> codes;
+  std::array<cool_char, cool_char::WORD_MAX_VAL> codes;
   encoder::node* tree;
   uint8_t nlast_bits;
   void build_tree_dfs(encoder::node*& root, input_wrapper& iw);

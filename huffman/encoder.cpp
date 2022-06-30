@@ -66,7 +66,7 @@ void encoder::build_tree() {
     return a->chr < b->chr;
   };
   std::priority_queue<node*, std::vector<node*>, decltype(compare)> q(compare);
-  for (size_t i = 0; i < WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
     if (frequency[i] > 0) {
       q.push(new node(i, frequency[i]));
     }
@@ -105,7 +105,7 @@ void encoder::print_metadata(std::ostream& output) {
   output_wrapper ow = output_wrapper(output);
   print_tree_dfs(tree, ow);
   uint8_t nlast_bits = 0;
-  for (size_t i = 0; i < WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
     nlast_bits += frequency[i] * codes[i].nbits;
   }
   if (tree) {
@@ -129,7 +129,7 @@ void encoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {
 
 void encoder::print_codes(std::ostream& output) {
   output << "codes = {\n";
-  for (size_t i = 0; i < WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
     output << "  " << i << " [";
     for (int j = 0; j < codes[i].nbits; ++j) {
       output << ((codes[i].data >> (cool_char::WORD_WIDTH - j - 1)) & 1);
@@ -147,4 +147,8 @@ void encoder::encode(std::istream& input, std::ostream& output) {
       ow << codes[w];
     }
   }
+}
+
+std::vector<cool_char> encoder::get_codes() {
+  return {codes.begin(), codes.end()};
 }
