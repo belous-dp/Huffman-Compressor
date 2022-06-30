@@ -2,8 +2,8 @@
 // Created by Danila Belous on 28.06.2022 at 14:46.
 //
 
-#include "huffman/decoder.h"
-#include "huffman/encoder.h"
+#include "decoder.h"
+#include "encoder.h"
 #include <args.hxx>
 #include <fstream>
 #include <iostream>
