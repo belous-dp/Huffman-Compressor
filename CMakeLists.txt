@@ -7,10 +7,11 @@ add_library(huffman STATIC huffman/cool_char.cpp
                            huffman/decoder.cpp       huffman/encoder.cpp
                            huffman/input_wrapper.cpp huffman/output_wrapper.cpp)
 
-set(APP_EXE huffman-tool)
+set(APP_EXE tests)
+#set(APP_EXE huffman-tool)
 set(LIB_NAME huffman)
-#add_executable(${APP_EXE} huffman_tool.cpp unit-tests/tests.cpp)
-add_executable(${APP_EXE} huffman_tool.cpp)
+add_executable(${APP_EXE} unit-tests/tests.cpp)
+#add_executable(${APP_EXE} huffman_tool.cpp)
 
 if (NOT MSVC)
     target_compile_options(${LIB_NAME} PRIVATE -Wall -Wno-sign-compare -pedantic)
@@ -35,7 +36,7 @@ if (CMAKE_BUILD_TYPE MATCHES "Debug")
     target_compile_options(${APP_EXE} PUBLIC -D_GLIBCXX_DEBUG)
 endif ()
 
-find_package(args REQUIRED)
-#find_package(GTest REQUIRED)
-#target_link_libraries(${APP_EXE} PRIVATE huffman taywee::args GTest::gtest GTest::gtest_main)
-target_link_libraries(${APP_EXE} PRIVATE huffman taywee::args)
+find_package(GTest REQUIRED)
+#find_package(args REQUIRED)
+target_link_libraries(${APP_EXE} PRIVATE huffman GTest::gtest GTest::gtest_main)
+#target_link_libraries(${APP_EXE} PRIVATE huffman taywee::args)
