@@ -52,12 +52,34 @@ TEST(cool_char, addZeroBit1) {
   EXPECT_EQ(res.nbits, 2);
 }
 
-//TEST(cool_char, addZeroBit3) {
-//  cool_char cc = 1;
-//  cc.add_bit(0);
-//  EXPECT_EQ(cc.data, 1U << (cool_char::WORD_WIDTH - 1U));
-//  EXPECT_EQ(cc.nbits, 2);
-//}
+TEST(cool_char, addZeroBit3) {
+  cool_char cc = cool_char(3, 3);
+  cool_char res = cc.add_bit(0);
+  EXPECT_EQ(res.data, 0b01100000);
+  EXPECT_EQ(res.nbits, 4);
+}
+
+TEST(cool_char, addOneBit0) {
+  cool_char cc;
+  cool_char res = cc.add_bit(1);
+  EXPECT_EQ(res.data, 1U << (cool_char::WORD_WIDTH - 1U));
+  EXPECT_EQ(res.nbits, 1);
+}
+
+TEST(cool_char, addOneBit1) {
+  cool_char cc = 1;
+  cool_char res = cc.add_bit(1);
+  EXPECT_EQ(res.data, 1U << (cool_char::WORD_WIDTH - 1U) |
+                          1U << (cool_char::WORD_WIDTH - 2U));
+  EXPECT_EQ(res.nbits, 2);
+}
+
+TEST(cool_char, addOneBit3) {
+  cool_char cc = cool_char(3, 3);
+  cool_char res = cc.add_bit(1);
+  EXPECT_EQ(res.data, 0b01110000);
+  EXPECT_EQ(res.nbits, 4);
+}
 
 TEST(encoder, processesOneChar) {
   encoder enc = encoder();
