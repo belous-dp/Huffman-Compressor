@@ -20,8 +20,7 @@ void decoder::scan_metadata(std::istream& input) {
     cool_char nlb = cool_char(0, cool_char::WORD_WIDTH_WIDTH);
     iw >> nlb;
     if (!iw) {
-      std::cerr << "metadata corrupted" << std::endl;
-      exit(0);
+      throw std::invalid_argument("metadata corrupted");
     }
     nlast_bits = nlb.data >> (cool_char::WORD_WIDTH - nlb.nbits);
     if (nlast_bits == 0) {
@@ -38,8 +37,7 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
       auto w = cool_char(0, cool_char::WORD_WIDTH);
       iw >> w;
       if (!iw) {
-        std::cerr << "invalid tree" << std::endl;
-        exit(0);
+        throw std::invalid_argument("invalid tree");
       }
       root = new encoder::node(w.data);
     } else {
@@ -47,8 +45,7 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
       build_tree_dfs(root->left, iw);
       build_tree_dfs(root->right, iw);
       if (!root->right) {
-        std::cerr << "invalid tree" << std::endl;
-        exit(0);
+        throw std::invalid_argument("invalid tree");
       }
     }
   }
@@ -95,8 +92,7 @@ void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
     auto bit = cool_char(0);
     iw >> bit;
     if (!iw || (iw.eof() && nlast_bits == 0)) {
-      std::cerr << "invalid data" << std::endl;
-      exit(0);
+      throw std::invalid_argument("invalid data");
     }
     if (iw.eof()) {
       nlast_bits--;

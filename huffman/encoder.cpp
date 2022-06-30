@@ -9,10 +9,7 @@
 #include <queue>
 
 encoder::encoder() : codes({}), frequency({}), tree(nullptr) {
-  if (!std::is_unsigned_v<word>) {
-    std::cerr << "word should be unsigned type" << std::endl;
-    exit(0);
-  }
+  assert(std::is_unsigned_v<word>);
 }
 
 encoder::~encoder() {
