@@ -5,24 +5,24 @@
 #ifndef HUFFMAN_OUTPUT_WRAPPER_H
 #define HUFFMAN_OUTPUT_WRAPPER_H
 
-#include "cool_char.h"
-#include "cool_sequence.h"
+#include "bit_sequence.h"
 #include <climits>
 #include <ostream>
 struct output_wrapper {
-
-//  word data; // биты хранятся в старших разрядах
-//  word nbits;
+  using word = bit_sequence::word;
 
   explicit output_wrapper(std::ostream& output);
   ~output_wrapper();
 
-  output_wrapper& operator <<(cool_char const& next);
-  output_wrapper& operator <<(cool_sequence const& next);
+  output_wrapper& print_bit(uint8_t bit);
+  output_wrapper& print_word(word w);
+  output_wrapper& print_bit_sequence(bit_sequence const& bs);
 
 private:
+  bit_sequence buf;
   std::ostream& output;
-  cool_char cc;
+
+  output_wrapper& maybe_print();
   output_wrapper& flush();
 };
 

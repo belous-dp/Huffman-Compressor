@@ -5,19 +5,23 @@
 #ifndef HUFFMAN_INPUT_WRAPPER_H
 #define HUFFMAN_INPUT_WRAPPER_H
 
-#include "cool_char.h"
+#include "bit_sequence.h"
 #include <istream>
 struct input_wrapper {
-  explicit input_wrapper(std::istream& input);
+  explicit input_wrapper(std::istream& input, size_t chunk_size, uint8_t nlb);
 
-  input_wrapper& operator >>(cool_char& res);
-  explicit operator bool() const;
-  bool eof();
+  bool has(size_t n);
+  uint8_t scan_bit();
+  bit_sequence::word scan_word();
 
 private:
-  cool_char cc;
+  bit_sequence buf;
   std::istream& input;
-  bool last_returned;
+  size_t chunk_size;
+  size_t pos;
+  uint8_t nlb;
+  void fetch(size_t n);
+  bool eof();
 };
 
 #endif // HUFFMAN_INPUT_WRAPPER_H

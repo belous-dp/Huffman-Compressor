@@ -5,114 +5,103 @@
 #include <gmock/gmock.h>
 #include <random>
 
-TEST(cool_char, defaultCtor) {
-  cool_char cc;
-  EXPECT_EQ(cc.data, 0);
-  EXPECT_EQ(cc.nbits, 0);
-}
-
-TEST(cool_char, zeroBitCtor) {
-  cool_char cc = 0;
-  EXPECT_EQ(cc.data, 0);
-  EXPECT_EQ(cc.nbits, 1);
-}
-
-TEST(cool_char, oneBitCtor) {
-  cool_char cc = 1;
-  EXPECT_EQ(cc.data, 1U << (cool_char::WORD_WIDTH - 1U));
-  EXPECT_EQ(cc.nbits, 1);
-}
-
-TEST(cool_char, threeBitsCtor) {
-  cool_char cc = cool_char(3, 3);
-  EXPECT_EQ(cc.data, 0b01100000);
-  EXPECT_EQ(cc.nbits, 3);
-}
-
-TEST(cool_char, wordCtor) {
-  std::mt19937 gen(42);
-  std::uniform_int_distribution<> rnd(0, cool_char::WORD_MAX_VAL);
-  for (size_t i = 0; i < 100; ++i) {
-    auto val = static_cast<cool_char::word>(rnd(gen));
-    cool_char cc = cool_char(val, cool_char::WORD_WIDTH);
-    EXPECT_EQ(cc.data, val);
-    EXPECT_EQ(cc.nbits, cool_char::WORD_WIDTH);
+struct bs : bit_sequence {
+  std::vector<uint8_t>& get_bits() {
+    return bits;
+  };
+  uint8_t& get_nlb() {
+    return nlb;
   }
+};
+
+TEST(bit_sequence, defaultCtor) {
+  bs s;
+  EXPECT_THAT(s.get_bits(), ::testing::ContainerEq(std::vector<uint8_t>()));
+  EXPECT_EQ(s.get_nlb(), 0);
 }
 
-TEST(cool_char, addZeroBit0) {
-  cool_char cc;
-  cool_char res = cc.add_bit(0);
-  EXPECT_EQ(res.data, 0);
-  EXPECT_EQ(res.nbits, 1);
+TEST(bit_sequence, copyCtor) {
+  bs s1;
+  s1.append_word(234);
+  s1.append_bit(1);
+  bs s2 = s1;
+  EXPECT_THAT(s1.get_bits(), ::testing::ContainerEq(s2.get_bits()));
+  EXPECT_EQ(s1.get_nlb(), s2.get_nlb());
+  s1.append_bit(1);
+  EXPECT_THAT(s1.get_bits(), ::testing::Not(::testing::ContainerEq(s2.get_bits())));
+  EXPECT_NE(s1.get_nlb(), s2.get_nlb());
 }
 
-TEST(cool_char, addZeroBit1) {
-  cool_char cc = 1;
-  cool_char res = cc.add_bit(0);
-  EXPECT_EQ(res.data, 1U << (cool_char::WORD_WIDTH - 1U));
-  EXPECT_EQ(res.nbits, 2);
+TEST(bit_sequence, assignment) {
+  bs s1;
+  s1.append_word(234);
+  s1.append_bit(1);
+  bs s2;
+  s2.append_word(123);
+  s2.append_bit(0);
+  EXPECT_THAT(s1.get_bits(), ::testing::Not(::testing::ContainerEq(s2.get_bits())));
+  EXPECT_NE(s1.get_nlb(), s2.get_nlb());
+  s2 = s1;
+  EXPECT_THAT(s1.get_bits(), ::testing::ContainerEq(s2.get_bits()));
+  EXPECT_EQ(s1.get_nlb(), s2.get_nlb());
+  s1.append_bit(1);
+  EXPECT_THAT(s1.get_bits(), ::testing::Not(::testing::ContainerEq(s2.get_bits())));
+  EXPECT_NE(s1.get_nlb(), s2.get_nlb());
 }
+//
+//TEST(bit_sequence, swap) {
+//  bs s1;
+//  s1.append_word(234);
+//  s1.append_bit(1);
+//  bs s2;
+//  s2.append_word(123);
+//  s2.append_bit(0);
+//  std::vector<uint8_t> s1b(s1.get_bits());
+//  std::vector<uint8_t> s1b(s1.get_bits());
+//  EXPECT_THAT(s1.get_bits(), ::testing::Not(::testing::ContainerEq(s2.get_bits())));
+//  EXPECT_NE(s1.get_nlb(), s2.get_nlb());
+//  s2 = s1;
+//  EXPECT_THAT(s1.get_bits(), ::testing::ContainerEq(s2.get_bits()));
+//  EXPECT_EQ(s1.get_nlb(), s2.get_nlb());
+//  s1.append_bit(0);
+//  EXPECT_THAT(s1.get_bits(), ::testing::Not(::testing::ContainerEq(s2.get_bits())));
+//  EXPECT_NE(s1.get_nlb(), s2.get_nlb());
+//}
 
-TEST(cool_char, addZeroBit3) {
-  cool_char cc = cool_char(3, 3);
-  cool_char res = cc.add_bit(0);
-  EXPECT_EQ(res.data, 0b01100000);
-  EXPECT_EQ(res.nbits, 4);
-}
+//TEST(bit_sequence, appendBit0) {
+//
+//}
 
-TEST(cool_char, addOneBit0) {
-  cool_char cc;
-  cool_char res = cc.add_bit(1);
-  EXPECT_EQ(res.data, 1U << (cool_char::WORD_WIDTH - 1U));
-  EXPECT_EQ(res.nbits, 1);
-}
+//TEST(bit_sequence, wordCtor) {
+//  std::mt19937 gen(42);
+//  std::uniform_int_distribution<> rnd(0, cool_char::WORD_MAX_VAL);
+//  for (size_t i = 0; i < 100; ++i) {
+//    auto val = static_cast<cool_char::word>(rnd(gen));
+//    cool_char cc = cool_char(val, cool_char::WORD_WIDTH);
+//    EXPECT_EQ(cc.data, val);
+//    EXPECT_EQ(cc.nbits, cool_char::WORD_WIDTH);
+//  }
+//}
 
-TEST(cool_char, addOneBit1) {
-  cool_char cc = 1;
-  cool_char res = cc.add_bit(1);
-  EXPECT_EQ(res.data, 1U << (cool_char::WORD_WIDTH - 1U) |
-                          1U << (cool_char::WORD_WIDTH - 2U));
-  EXPECT_EQ(res.nbits, 2);
-}
-
-TEST(cool_char, addOneBit3) {
-  cool_char cc = cool_char(3, 3);
-  cool_char res = cc.add_bit(1);
-  EXPECT_EQ(res.data, 0b01110000);
-  EXPECT_EQ(res.nbits, 4);
-}
-
-TEST(cool_char, eqOperator) {
-  cool_char cc1 = cool_char(3, 3);
-  cool_char cc2 = cool_char(3, 3);
-  cool_char cc3 = cool_char(2, 3);
-  cool_char cc4 = cool_char(3, 2);
-  EXPECT_EQ(cc1, cc2);
-  EXPECT_NE(cc1, cc3);
-  EXPECT_NE(cc1, cc4);
-  EXPECT_NE(cc3, cc4);
-}
-
-TEST(encoder, processOneChar) {
-  std::vector<cool_sequence> correct(cool_char::WORD_MAX_VAL);
-  for (cool_char::word i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-    encoder enc = encoder();
-    enc.process_input(i);
-    enc.build_tree();
-    std::vector<cool_sequence> codes = enc.get_codes();
-    correct[i].add_bit(1);
-    EXPECT_THAT(codes, ::testing::ContainerEq(correct));
-    correct[i].remove_bit();
-  }
-}
+//TEST(encoder, processOneChar) {
+//  std::vector<cool_sequence> correct(cool_char::WORD_MAX_VAL);
+//  for (cool_char::word i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
+//    encoder enc = encoder();
+//    enc.collect_statistics(i);
+//    enc.build_tree();
+//    std::vector<cool_sequence> codes = enc.get_codes();
+//    correct[i].add_bit(1);
+//    EXPECT_THAT(codes, ::testing::ContainerEq(correct));
+//    correct[i].remove_bit();
+//  }
+//}
 
 std::string encode_decode(std::string const& s) {
   std::istringstream init_data_input(s);
   encoder enc = encoder();
-  enc.process_input(init_data_input);
+  enc.collect_statistics(init_data_input);
   enc.build_tree();
-//  enc.print_codes(std::cout);
+  enc.print_codes(std::cout);
   init_data_input = std::istringstream(s);
   std::ostringstream compressed_data_output;
   enc.print_metadata(compressed_data_output);
@@ -123,6 +112,7 @@ std::string encode_decode(std::string const& s) {
   std::ostringstream decompressed_data_output;
   dec.decode(compressed_data_input, decompressed_data_output);
   return decompressed_data_output.str();
+//  return "";
 }
 
 TEST(correctness, empty) {
@@ -150,8 +140,84 @@ TEST(correctness, handRandom) {
   EXPECT_EQ(s, encode_decode(s));
 }
 
-TEST(correctness, longRandom) {
-  std::string s = "askdfhi2hsjasldfkjalsdjkflasjdf;alksjdfl;akjsdf1029jd0912j3s012js0a;dsf-02398u&y9!*Y(!*#1onaksnd2asldfn3";
+TEST(correctness, russian) {
+  std::string s = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя1234567890";
+  EXPECT_EQ(s, encode_decode(s));
+}
+
+TEST(correctness, russianLong) {
+  std::string s = "ааааааааааааааааааааааааааааааааа"
+                  "бббббббббббббббббббббббббббббббб"
+                  "ввввввввввввввввввввввввввввввв"
+                  "гггггггггггггггггггггггггггггг"
+                  "ддддддддддддддддддддддддддддд"
+                  "ееееееееееееееееееееееееееее"
+                  "ёёёёёёёёёёёёёёёёёёёёёёёёёёё"
+                  "жжжжжжжжжжжжжжжжжжжжжжжжжж"
+                  "ззззззззззззззззззззззззз"
+                  "ииииииииииииииииииииииии"
+                  "ййййййййййййййййййййййй"
+                  "кккккккккккккккккккккк"
+                  "ллллллллллллллллллллл"
+                  "мммммммммммммммммммм"
+                  "ннннннннннннннннннн"
+                  "оооооооооооооооооо"
+                  "ппппппппппппппппп"
+                  "рррррррррррррррр"
+                  "ссссссссссссссс"
+                  "тттттттттттттт"
+                  "ууууууууууууу"
+                  "фффффффффффф"
+                  "ххххххххххх"
+                  "цццццццццц"
+                  "ччччччччч"
+                  "шшшшшшшш"
+                  "щщщщщщщ"
+                  "ъъъъъъ"
+                  "ыыыыы"
+                  "ьььь"
+                  "эээ"
+                  "юю"
+                  "я"
+                  "1"
+                  "2"
+                  "3"
+                  "4"
+                  "5"
+                  "6"
+                  "7"
+                  "8"
+                  "9"
+                  "0";
+  EXPECT_EQ(s, encode_decode(s));
+}
+
+TEST(correctness, medium) {
+  std::string s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                  "ccccccccccccccccccccccccccccccc"
+                  "гггггггггггггггггггггггггггггг"
+                  "ддддддддддддддддддддддддддддд"
+                  "ееееееееееееееееееееееееееее"
+                  "ёёёёёёёёёёёёёёёёёёёёёёёёёёё"
+                  "жжжжжжжжжжжжжжжжжжжжжжжжжж"
+                  "ззззззззззззззззззззззззз"
+                  "ииииииииииииииииииииииии"
+                  "ййййййййййййййййййййййй"
+                  "ьььь"
+                  "эээ"
+                  "юю"
+                  "я"
+                  "1"
+                  "2"
+                  "3"
+                  "4"
+                  "5"
+                  "6"
+                  "7"
+                  "8"
+                  "9"
+                  "0";
   EXPECT_EQ(s, encode_decode(s));
 }
 
