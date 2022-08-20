@@ -7,29 +7,32 @@
 #include <cstddef>
 #include <iostream>
 
-decoder::decoder() : tree(nullptr), nlast_bits(0) {}
+using bs = bit_sequence;
+
+decoder::decoder() : tree(nullptr), unused(0) {}
 
 decoder::~decoder() {
   destroy_tree(tree);
 }
 
 void decoder::scan_metadata(std::istream& input) {
-  auto iw =
-      input_wrapper(input, bit_sequence::WORD_WIDTH, bit_sequence::WORD_WIDTH);
-  if (iw.has(1)) {
+  auto iw = input_wrapper(input);
+  if (iw.has()) {
     build_tree_dfs(tree, iw);
-    if (!iw.has(bit_sequence::WORD_WIDTH)) {
+    if (!iw.has(3)) {
       throw std::invalid_argument("metadata corrupted");
     }
-    nlast_bits = iw.scan_word();
+    unused = iw.scan_bit();
+    unused |= iw.scan_bit() << 1;
+    unused |= iw.scan_bit() << 2;
   }
 }
 
 void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
-  if (iw.has(1)) {
+  if (iw.has()) {
     uint8_t bit = iw.scan_bit();
     if (bit > 0) {
-      if (!iw.has(bit_sequence::WORD_WIDTH)) {
+      if (!iw.has(bs::WORD_WIDTH)) {
         throw std::invalid_argument("invalid tree");
       }
       root = new encoder::node(iw.scan_word());
@@ -45,20 +48,19 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
 }
 
 void decoder::decode(std::istream& input, std::ostream& output) const {
-  auto iw = input_wrapper(
-      input, static_cast<size_t>(bit_sequence::WORD_WIDTH * 4096U), nlast_bits);
-  while (iw.has(1)) {
+  auto iw = input_wrapper(input, unused);
+  while (iw.has()) {
     decode_dfs(tree, iw, output);
   }
 }
 
 void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
                          std::ostream& output) const {
-  if (!root->left) { // leaf
+  if (is_leaf(root)) {
     output << static_cast<char>(root->chr);
     return;
   } else {
-    if (!iw.has(1)) {
+    if (!iw.has()) {
       throw std::invalid_argument("invalid data");
       //      output.flush();
       //      std::cerr << "invalid data" << std::endl;

@@ -20,7 +20,7 @@ struct decoder {
 
 private:
   encoder::node* tree;
-  uint8_t nlast_bits;
+  uint8_t unused;
   void build_tree_dfs(encoder::node*& root, input_wrapper& iw);
   void decode_dfs(encoder::node* root, input_wrapper& iw, std::ostream& ow) const;
 };
