@@ -16,7 +16,7 @@ struct output_wrapper {
 
   output_wrapper& print_bit(uint8_t bit);
   output_wrapper& print_word(word w);
-  output_wrapper& print_bit_sequence(bit_sequence const& bs);
+  output_wrapper& print_bit_sequence(bit_sequence const& bitseq);
 
 private:
   bit_sequence buf;

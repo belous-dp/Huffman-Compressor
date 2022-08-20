@@ -126,7 +126,7 @@ void encoder::print_metadata(std::ostream& output) const {
   if (tree) {
     len %= bit_sequence::WORD_WIDTH;
     uint8_t unused = (len == 0 ? 0 : bit_sequence::WORD_WIDTH - len);
-    ow.print_word(unused);
+    ow.print_bit(unused & 1).print_bit((unused >> 1) & 1).print_bit((unused >> 2) & 1);
   }
 }
 
