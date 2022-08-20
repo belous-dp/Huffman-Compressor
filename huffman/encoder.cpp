@@ -25,18 +25,13 @@ void destroy_tree(encoder::node* root) {
   }
 }
 
-void encoder::process_input(std::istream& input) {
-  while (input) {
-    word w = input.get();
-    if (input) {
-      process_input(w);
-    }
+bool is_leaf(encoder::node* pNode) {
+  if (pNode->left != nullptr) {
+    assert(pNode->right != nullptr);
+    return false;
   }
-}
-
-void encoder::process_input(encoder::word character) {
-  //  frequency[static_cast<size_t>(character)]++;
-  frequency[character]++;
+  assert(pNode->right == nullptr);
+  return true;
 }
 
 encoder::node::node(encoder::node* left, encoder::node* right)
@@ -54,10 +49,27 @@ encoder::node::node(encoder::word chr, size_t frq)
 
 encoder::node::node(encoder::word chr) : node(chr, 0) {}
 
+
+
+void encoder::process_input(std::istream& input) {
+  collect_statistics(input);
+  build_tree();
+}
+
+void encoder::collect_statistics(std::istream& input) {
+  while (input) {
+    word w = input.get();
+    if (input) {
+      collect_statistics(w);
+    }
+  }
+}
+
+void encoder::collect_statistics(encoder::word character) {
+  frequency[character]++;
+}
+
 void encoder::build_tree() {
-  //  auto compare = [](encoder::node const* const a,
-  //                    encoder::node const* const b) { return a->frq > b->frq;
-  //                    };
   auto compare = [](encoder::node const* const a,
                     encoder::node const* const b) {
     if (a->frq != b->frq) {
@@ -65,8 +77,8 @@ void encoder::build_tree() {
     }
     return a->chr < b->chr;
   };
-  std::priority_queue<node*, std::vector<node*>, decltype(compare)> q(compare);
-  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
+  std::priority_queue<node*, std::vector<node*>, decltype(compare)> q(compare); // todo maybe smart pointers?
+  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
     if (frequency[i] > 0) {
       q.push(new node(i, frequency[i]));
     }
@@ -82,78 +94,77 @@ void encoder::build_tree() {
     tree = q.top();
     q.pop();
   }
-  if (tree && !tree->left) { // заифаем случаи "ааааааа"
-    tree->left = new node(tree->chr);
-    tree->right = new node(tree->chr);
+  bit_sequence cs;
+  if (tree && is_leaf(tree)) { // "aaa", "bbb", etc.
+    cs.append_bit(0);
   }
-  cool_sequence cs;
   build_codes(tree, cs);
 }
 
-void encoder::build_codes(encoder::node* root, cool_sequence& cur) {
+void encoder::build_codes(encoder::node* root, bit_sequence& cur) {
   if (root) {
-    if (root->left) {
-      assert(root->right);
-      cur.add_bit(0);
+    if (!is_leaf(root)) {
+      cur.append_bit(0);
       build_codes(root->left, cur);
-      cur.remove_bit();
-      cur.add_bit(1);
+      cur.pop_back_bit();
+      cur.append_bit(1);
       build_codes(root->right, cur);
-      cur.remove_bit();
+      cur.pop_back_bit();
     } else {
       codes[root->chr] = cur;
     }
   }
 }
 
-void encoder::print_metadata(std::ostream& output) {
-  output_wrapper ow = output_wrapper(output);
-  print_tree_dfs(tree, ow);
-  uint8_t nlast_bits = 0;
-  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-    nlast_bits += frequency[i] * codes[i].get_nbits();
+void encoder::print_metadata(std::ostream& output) const {
+  auto ow = output_wrapper(output);
+  print_tree(tree, ow);
+  uint8_t len = 0;
+  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+    len += frequency[i] * codes[i].size();
   }
   if (tree) {
-    ow << cool_char(nlast_bits, cool_char::WORD_WIDTH_WIDTH);
+    len %= bit_sequence::WORD_WIDTH;
+    uint8_t unused = (len == 0 ? 0 : bit_sequence::WORD_WIDTH - len);
+    ow.print_word(unused);
   }
 }
 
-void encoder::print_tree_dfs(encoder::node* root, output_wrapper& out) {
+void encoder::print_tree(encoder::node* root, output_wrapper& out) const {
   // идея: на внутренних вершинах выводим 0, на листьях -- 1 и код символа
   if (root) {
-    if (root->left) {
-      assert(root->right);
-      out << 0;
-      print_tree_dfs(root->left, out);
-      print_tree_dfs(root->right, out);
+    if (!is_leaf(root)) {
+      out.print_bit(0);
+      print_tree(root->left, out);
+      print_tree(root->right, out);
     } else {
-      out << 1 << cool_char(root->chr, cool_char::WORD_WIDTH);
+      out.print_bit(1).print_word(root->chr);
     }
   }
 }
 
-void encoder::print_codes(std::ostream& output) {
-//  output << "codes = {\n";
-//  for (size_t i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-//    output << "  " << i << " [";
-//    for (uint8_t j = 0; j < codes[i].nbits; ++j) {
-//      output << (static_cast<uint8_t>(codes[i].data >> (cool_char::WORD_WIDTH - j - 1U)) & 1U);
-//    }
-//    output << "]\n";
-//  }
-//  output << "}\n";
-}
-
-void encoder::encode(std::istream& input, std::ostream& output) {
+void encoder::encode(std::istream& input, std::ostream& output) const {
   output_wrapper ow = output_wrapper(output);
   while (input) {
     word w = input.get();
     if (input) {
-      ow << codes[w];
+      ow.print_bit_sequence(codes[w]);
     }
   }
 }
 
-std::vector<cool_sequence> encoder::get_codes() {
+std::vector<bit_sequence> encoder::get_codes() {
   return {codes.begin(), codes.end()};
+}
+
+void encoder::print_codes(std::ostream& output) {
+  output << "codes = {\n";
+  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+    output << "  " << i << " [";
+    for (size_t j = 0; j < codes[i].size(); ++j) {
+      output << static_cast<uint16_t>(codes[i].bit_at(j));
+    }
+    output << "]\n";
+  }
+  output << "}\n";
 }

@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
     if (compress) {
       encoder enc = encoder();
       enc.process_input(inp);
-      enc.build_tree();
       enc.print_metadata(outp);
       inp.close();
       inp = std::ifstream(args::get(input));

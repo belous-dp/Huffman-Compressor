@@ -5,8 +5,7 @@
 #ifndef HUFFMAN_ENCODER_H
 #define HUFFMAN_ENCODER_H
 
-#include "cool_char.h"
-#include "cool_sequence.h"
+#include "bit_sequence.h"
 #include "output_wrapper.h"
 #include <array>
 #include <cstddef>
@@ -17,26 +16,27 @@
 
 struct encoder {
   friend struct decoder;
-  using word = cool_char::word;
+  using word = bit_sequence::word;
 
   encoder();
   ~encoder();
 
   void process_input(std::istream& input);
-  void process_input(word character);
 
-  void build_tree();
-  void print_metadata(std::ostream& output);
+  void print_metadata(std::ostream& output) const;
 
-  std::vector<cool_sequence> get_codes();
+  std::vector<bit_sequence> get_codes(); // todo debug, remove
+  void print_codes(std::ostream& output); // todo debug, remove
 
-  void encode(std::istream& input, std::ostream& output);
+  void encode(std::istream& input, std::ostream& output) const;
 
 private:
-  std::array<cool_sequence, cool_char::WORD_MAX_VAL> codes;
-  std::array<size_t, cool_char::WORD_MAX_VAL> frequency;
+  void collect_statistics(std::istream& input);
+  void collect_statistics(word character);
+  void build_tree();
 
-  void print_codes(std::ostream& output);
+  std::array<bit_sequence, bit_sequence::WORD_MAX_VAL> codes;
+  std::array<size_t, bit_sequence::WORD_MAX_VAL> frequency;
 
   struct node {
     node* left;
@@ -47,10 +47,15 @@ private:
     node(word chr, size_t frq);
     explicit node(word chr);
   };
+
   node* tree;
+
   friend void destroy_tree(node* root);
-  void build_codes(node* root, cool_sequence& cur);
-  void print_tree_dfs(node* root, output_wrapper& out);
+  friend bool is_leaf(node* pNode);
+
+  void build_codes(node* root, bit_sequence& cur);
+  void print_tree(node* root, output_wrapper& out) const;
+
 };
 
 #endif // HUFFMAN_ENCODER_H
