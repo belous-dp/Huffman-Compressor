@@ -20,7 +20,7 @@ struct input_wrapper {
   word scan_word();
 
 private:
-  static const size_t BUF_SIZE = bit_sequence::WORD_WIDTH * 1024U;
+  static const size_t BUF_SIZE = bit_sequence::WORD_WIDTH * 1U;
 
   size_t cnt = 0;
   bit_sequence buf;
