@@ -8,7 +8,7 @@
 
 using bs = bit_sequence;
 
-output_wrapper::output_wrapper(std::ostream& output) : output(output) {}
+output_wrapper::output_wrapper(std::ostream& output) : buf(BUF_SIZE), output(output) {}
 
 output_wrapper::~output_wrapper() {
   flush();
@@ -50,7 +50,7 @@ output_wrapper& output_wrapper::maybe_print() {
     for (size_t i = 0; i + bs::WORD_WIDTH <= buf.size(); i += bs::WORD_WIDTH) {
       print(buf.word_at(i));
     }
-    bit_sequence nbuf;
+    bit_sequence nbuf(BUF_SIZE);
     for (size_t i = buf.size() - buf.size() % bs::WORD_WIDTH; i < buf.size(); ++i) {
       nbuf.append_bit(buf.bit_at(i));
     }

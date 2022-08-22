@@ -4,7 +4,11 @@
 
 #include "bit_sequence.h"
 #include <cassert>
-bit_sequence::bit_sequence() : len(0) {}
+bit_sequence::bit_sequence(size_t reserve_size) : len(0) {
+  if (reserve_size > 0) {
+    bits.reserve(reserve_size);
+  }
+}
 bit_sequence::bit_sequence(const bit_sequence& other) = default;
 bit_sequence& bit_sequence::operator=(const bit_sequence& other) {
   if (this != &other) {
@@ -56,11 +60,12 @@ void bit_sequence::append_bit(uint8_t bit) {
 }
 
 void bit_sequence::append_word(word w) {
-  if (len % WORD_WIDTH == 0) {
+  size_t pos = len % WORD_WIDTH;
+  if (pos == 0) {
     bits.push_back(w);
   } else {
-    bits.back() |= w << (len % WORD_WIDTH);
-    bits.push_back(w >> (WORD_WIDTH - len % WORD_WIDTH));
+    bits.back() |= w << pos;
+    bits.push_back(w >> (WORD_WIDTH - pos));
   }
   len += WORD_WIDTH;
 }

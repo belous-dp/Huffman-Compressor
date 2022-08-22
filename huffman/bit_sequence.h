@@ -14,7 +14,7 @@ struct bit_sequence {
   using word = uint8_t;
   static constexpr word WORD_MAX_VAL = std::numeric_limits<word>::max();
   static constexpr uint8_t WORD_WIDTH = sizeof(word) * CHAR_BIT;
-  bit_sequence();
+  bit_sequence(size_t reserve_size = 0);
   bit_sequence(bit_sequence const& other);
   bit_sequence& operator=(bit_sequence const& other);
   void swap(bit_sequence& other);

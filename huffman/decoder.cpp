@@ -49,13 +49,17 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
 
 void decoder::decode(std::istream& input, std::ostream& output) const {
   auto iw = input_wrapper(input, unused);
-  while (iw) {
-    if (encoder::is_leaf(tree)) { // "aaa", "bbb", etc.
-      if (iw.scan_bit() != 0) {
-        throw std::invalid_argument("invalid data");
+  try {
+    while (iw) {
+      if (encoder::is_leaf(tree)) { // "aaa", "bbb", etc.
+        if (iw.scan_bit() != 0) {
+          throw std::invalid_argument("invalid data");
+        }
       }
+      decode_dfs(tree, iw, output);
     }
-    decode_dfs(tree, iw, output);
+  } catch (std::invalid_argument& e) {
+    throw std::invalid_argument("invalid data");
   }
 }
 
@@ -65,9 +69,9 @@ void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
     output << static_cast<char>(root->chr);
     return;
   } else {
-    if (!iw) {
-      throw std::invalid_argument("invalid data");
-    }
+//    if (!iw) {
+//      throw std::invalid_argument("invalid data");
+//    }
     if (iw.scan_bit() > 0) {
       decode_dfs(root->right, iw, output);
     } else {
