@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
       enc.encode(inp, outp);
     } else {
       decoder dec = decoder();
-      dec.scan_metadata(inp);
+      dec.process_metadata(inp);
       dec.decode(inp, outp);
     }
     inp.close();
