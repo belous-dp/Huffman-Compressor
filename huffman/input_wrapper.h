@@ -9,28 +9,21 @@
 #include <istream>
 
 struct input_wrapper {
-  using word = bit_sequence::word;
-
-  explicit input_wrapper(std::istream& input, uint8_t unused,
-                         size_t fetch_size = BUF_SIZE);
+  explicit input_wrapper(std::istream& input, uint8_t unused);
   ~input_wrapper();
 
-  bool has(size_t n = 1);
   uint8_t scan_bit();
-  word scan_word();
+  bit_sequence::word scan_word();
+
+  explicit operator bool();
 
 private:
-  static const size_t BUF_SIZE = bit_sequence::WORD_WIDTH * 1U;
-
-  size_t cnt = 0;
-  bit_sequence buf;
+  bit_sequence::word buf;
   std::istream& input;
-  size_t fetch_size;
-  size_t pos;
+  size_t len;
   uint8_t unused;
-  void fetch(size_t n);
+  bool fetch();
   bool eof();
-  size_t buf_size() const;
 };
 
 #endif // HUFFMAN_INPUT_WRAPPER_H

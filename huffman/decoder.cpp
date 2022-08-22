@@ -15,31 +15,32 @@ decoder::~decoder() {
 }
 
 void decoder::process_metadata(std::istream& input) {
-  auto iw = input_wrapper(input, 0, bs::WORD_WIDTH);
-  if (iw.has()) {
-    build_tree_dfs(tree, iw);
-    if (!iw.has(3)) {
-      throw std::invalid_argument("metadata corrupted");
+  auto iw = input_wrapper(input, 0);
+  if (iw) {
+    try {
+      build_tree_dfs(tree, iw);
+    } catch (std::invalid_argument& e) {
+      throw std::invalid_argument("metadata corrupted: invalid tree");
     }
-    unused = iw.scan_bit();
-    unused |= iw.scan_bit() << 1;
-    unused |= iw.scan_bit() << 2;
+    try {
+      unused = iw.scan_bit();
+      unused |= iw.scan_bit() << 1;
+      unused |= iw.scan_bit() << 2;
+    } catch (std::invalid_argument& e) {
+      throw std::invalid_argument("metadata corrupted: wrong number of unused bits");
+    }
   }
 }
 
 void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
-  if (iw.has()) {
-    uint8_t bit = iw.scan_bit();
-    if (bit > 0) {
-      if (!iw.has(bs::WORD_WIDTH)) {
-        throw std::invalid_argument("invalid tree");
-      }
+  if (iw) {
+    if (iw.scan_bit() > 0) {
       root = new encoder::node(iw.scan_word());
     } else {
       root = new encoder::node(nullptr, nullptr);
       build_tree_dfs(root->left, iw);
       build_tree_dfs(root->right, iw);
-      if (!root->right) {
+      if (encoder::is_leaf(root)) {
         throw std::invalid_argument("invalid tree");
       }
     }
@@ -48,7 +49,7 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
 
 void decoder::decode(std::istream& input, std::ostream& output) const {
   auto iw = input_wrapper(input, unused);
-  while (iw.has()) {
+  while (iw) {
     if (encoder::is_leaf(tree)) { // "aaa", "bbb", etc.
       if (iw.scan_bit() != 0) {
         throw std::invalid_argument("invalid data");
@@ -64,11 +65,8 @@ void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
     output << static_cast<char>(root->chr);
     return;
   } else {
-    if (!iw.has()) {
+    if (!iw) {
       throw std::invalid_argument("invalid data");
-//            output.flush();
-//            std::cerr << "invalid data" << std::endl;
-//            exit(1);
     }
     if (iw.scan_bit() > 0) {
       decode_dfs(root->right, iw, output);

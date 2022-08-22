@@ -8,73 +8,65 @@
 
 using bs = bit_sequence;
 
-input_wrapper::input_wrapper(std::istream& input, uint8_t unused,
-                             size_t fetch_size)
-    : input(input), fetch_size(fetch_size), pos(0), unused(unused) {
+input_wrapper::input_wrapper(std::istream& input, uint8_t unused)
+    : buf(0), input(input), len(0), unused(unused) {
   assert(unused < bs::WORD_WIDTH);
 }
 
-input_wrapper::~input_wrapper() {
-//  std::cout << "fetch size = " << fetch_size << std::endl;
-//  std::cout << "cnt = " << cnt << std::endl;
-//  std::cout << "buf size = " << buf.size() << std::endl;
-}
+input_wrapper::~input_wrapper() = default;
 
-bool input_wrapper::has(size_t n) {
-  if (buf_size() < n) {
-    fetch(fetch_size);
-  }
-  return buf_size() >= n;
-}
-
-size_t input_wrapper::buf_size() const {
-  return buf.size() - pos;
-}
-
-void input_wrapper::fetch(size_t n) {
+bool input_wrapper::fetch() {
   if (!input) {
-    return;
+    return false;
   }
-  bit_sequence nbuf;
-  for (size_t i = pos; i + bs::WORD_WIDTH <= buf.size(); i += bs::WORD_WIDTH) {
-    nbuf.append_word(buf.word_at(i));
+  buf = bs::reverse_word(input.get());
+  len = bs::WORD_WIDTH;
+  if (!input) {
+    return false;
   }
-  for (size_t i = buf.size() - (buf.size() - pos) % bs::WORD_WIDTH;
-       i < buf.size(); ++i) {
-    nbuf.append_bit(buf.bit_at(i));
+  if (eof()) {
+    buf &= (1 << (bs::WORD_WIDTH - unused)) - 1;
+    len -= unused;
   }
-  buf = nbuf;
-  pos = 0;
-  while (buf_size() < n) {
-    word w = bs::reverse_word(input.get());
-    if (!input) {
-      return;
-    }
-    buf.append_word(w);
-    if (eof()) {
-      for (size_t i = 0; i < unused; ++i) {
-        buf.pop_back_bit();
-      }
-    }
-  }
+  return true;
 }
 
 bool input_wrapper::eof() {
   return input.peek() == std::char_traits<char>::eof();
 }
 
+void error() {
+  throw std::invalid_argument("bad input request");
+}
+
 uint8_t input_wrapper::scan_bit() {
-  if (!has()) {
-    throw std::invalid_argument("bad input request");
+  if (len == 0 && !fetch()) {
+    error();
   }
-  return buf.bit_at(pos++);
+  uint8_t bit = buf & 1;
+  buf >>= 1;
+  len--;
+  return bit;
 }
 
 bit_sequence::word input_wrapper::scan_word() {
-  if (!has(bs::WORD_WIDTH)) {
-    throw std::invalid_argument("bad input request");
+  if (len == 0 && !fetch()) {
+    error();
   }
-  word res = buf.word_at(pos);
-  pos += bs::WORD_WIDTH;
-  return res;
+  bs::word word = buf;
+  size_t past_len = len;
+  size_t left = bs::WORD_WIDTH - len;
+  buf = 0;
+  len = 0;
+  if (left > 0 && (!fetch() || len < left)) {
+    error();
+  }
+  word |= buf << past_len;
+  buf >>= left;
+  len -= left;
+  return word;
+}
+
+input_wrapper::operator bool() {
+  return len > 0 || fetch();
 }
