@@ -14,11 +14,13 @@ struct decoder {
   decoder();
   ~decoder();
 
-  void scan_metadata(std::istream& input);
+  void process_metadata(std::istream& input);
 
   void decode(std::istream& input, std::ostream& output) const;
 
-private:
+  void print_tree(encoder::node* root, output_wrapper& out) const; // todo debug remove
+
+//private:
   encoder::node* tree;
   uint8_t unused;
   void build_tree_dfs(encoder::node*& root, input_wrapper& iw);

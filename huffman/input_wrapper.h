@@ -11,21 +11,20 @@
 struct input_wrapper {
   using word = bit_sequence::word;
 
-  explicit input_wrapper(std::istream& input);
-  input_wrapper(std::istream& input, uint8_t unused);
+  explicit input_wrapper(std::istream& input, uint8_t unused,
+                         size_t fetch_size = 8192);
 
   bool has(size_t n = 1);
   uint8_t scan_bit();
   word scan_word();
 
 private:
-  static const size_t CHUNK_SIZE = 8192;
-
   bit_sequence buf;
   std::istream& input;
+  size_t fetch_size;
   size_t pos;
   uint8_t unused;
-  void fetch();
+  void fetch(size_t n);
   bool eof();
   size_t buf_size() const;
 };

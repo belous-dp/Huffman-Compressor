@@ -4,7 +4,6 @@
 
 #include "decoder.h"
 #include "input_wrapper.h"
-#include <cstddef>
 #include <iostream>
 
 using bs = bit_sequence;
@@ -12,11 +11,11 @@ using bs = bit_sequence;
 decoder::decoder() : tree(nullptr), unused(0) {}
 
 decoder::~decoder() {
-  destroy_tree(tree);
+  encoder::destroy_tree(tree);
 }
 
-void decoder::scan_metadata(std::istream& input) {
-  auto iw = input_wrapper(input);
+void decoder::process_metadata(std::istream& input) {
+  auto iw = input_wrapper(input, 0, bs::WORD_WIDTH);
   if (iw.has()) {
     build_tree_dfs(tree, iw);
     if (!iw.has(3)) {
@@ -50,26 +49,44 @@ void decoder::build_tree_dfs(encoder::node*& root, input_wrapper& iw) {
 void decoder::decode(std::istream& input, std::ostream& output) const {
   auto iw = input_wrapper(input, unused);
   while (iw.has()) {
+    if (encoder::is_leaf(tree)) { // "aaa", "bbb", etc.
+      if (iw.scan_bit() != 0) {
+        throw std::invalid_argument("invalid data");
+      }
+    }
     decode_dfs(tree, iw, output);
   }
 }
 
 void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
                          std::ostream& output) const {
-  if (is_leaf(root)) {
+  if (encoder::is_leaf(root)) {
     output << static_cast<char>(root->chr);
     return;
   } else {
     if (!iw.has()) {
-      throw std::invalid_argument("invalid data");
-      //      output.flush();
-      //      std::cerr << "invalid data" << std::endl;
-      //      exit(1);
+//      throw std::invalid_argument("invalid data");
+            output.flush();
+            std::cerr << "invalid data" << std::endl;
+            exit(1);
     }
     if (iw.scan_bit() > 0) {
       decode_dfs(root->right, iw, output);
     } else {
       decode_dfs(root->left, iw, output);
+    }
+  }
+}
+
+void decoder::print_tree(encoder::node* root, output_wrapper& out) const {
+  // идея: на внутренних вершинах выводим 0, на листьях -- 1 и код символа
+  if (root) {
+    if (!encoder::is_leaf(root)) {
+      out.print_bit(0);
+      print_tree(root->left, out);
+      print_tree(root->right, out);
+    } else {
+      out.print_bit(1).print_word(root->chr);
     }
   }
 }

@@ -8,16 +8,15 @@
 
 using bs = bit_sequence;
 
-input_wrapper::input_wrapper(std::istream& input) : input(input) {}
-
-input_wrapper::input_wrapper(std::istream& input, uint8_t unused)
-    : input(input), unused(unused) {
+input_wrapper::input_wrapper(std::istream& input, uint8_t unused,
+                             size_t fetch_size)
+    : input(input), fetch_size(fetch_size), pos(0), unused(unused) {
   assert(unused < bs::WORD_WIDTH);
 }
 
 bool input_wrapper::has(size_t n) {
   if (buf_size() < n) {
-    fetch();
+    fetch(fetch_size);
   }
   return buf_size() >= n;
 }
@@ -26,7 +25,7 @@ size_t input_wrapper::buf_size() const {
   return buf.size() - pos;
 }
 
-void input_wrapper::fetch() {
+void input_wrapper::fetch(size_t n) {
   if (!input) {
     return;
   }
@@ -42,8 +41,8 @@ void input_wrapper::fetch() {
   }
   buf = nbuf;
   pos = 0;
-  while (buf_size() < CHUNK_SIZE) {
-    word w = input.get();
+  while (buf_size() < n) {
+    word w = bs::reverse_word(input.get());
     if (!input) {
       return;
     }

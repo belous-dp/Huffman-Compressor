@@ -4,7 +4,7 @@
 
 #include "bit_sequence.h"
 #include <cassert>
-bit_sequence::bit_sequence() : nlb(0) {}
+bit_sequence::bit_sequence() : len(0) {}
 bit_sequence::bit_sequence(const bit_sequence& other) = default;
 bit_sequence& bit_sequence::operator=(const bit_sequence& other) {
   if (this != &other) {
@@ -16,71 +16,74 @@ bit_sequence& bit_sequence::operator=(const bit_sequence& other) {
 
 void bit_sequence::swap(bit_sequence& other) {
   std::swap(bits, other.bits);
-  std::swap(nlb, other.nlb);
+  std::swap(len, other.len);
 }
 
 bit_sequence::~bit_sequence() = default;
 
 uint8_t bit_sequence::bit_at(size_t index) const {
-  assert(index < size());
-  return static_cast<word>(bits[index / WORD_WIDTH] >>
-                           (WORD_WIDTH - index % WORD_WIDTH - 1U)) & 1U;
+  assert(index < len);
+  return (bits[index / WORD_WIDTH] >> (index % WORD_WIDTH)) & 1U;
 }
 
 bit_sequence::word bit_sequence::word_at(size_t index) const {
-  assert(index < size());
-  word res = bits[index / WORD_WIDTH] << (index % WORD_WIDTH);
-  if (index / WORD_WIDTH + 1 < bits.size() && index % WORD_WIDTH > 0) {
-    res |= static_cast<word>(bits[index / WORD_WIDTH + 1] >>
-                             (index % WORD_WIDTH));
+  assert(index < len);
+  size_t id = index / WORD_WIDTH;
+  size_t pos = index % WORD_WIDTH;
+  word res = bits[id] >> pos;
+  if (id + 1 < bits.size()) {
+    res |= bits[id + 1] << (WORD_WIDTH - pos);
   }
   return res;
 }
 
-void bit_sequence::append_bit(uint8_t bit) {
-  if (bits.empty() || nlb == WORD_WIDTH) {
-    bits.push_back(bit << (WORD_WIDTH - 1U));
-    nlb = 1;
-  } else {
-    bits.back() |= static_cast<word>(bit << (WORD_WIDTH - nlb - 1U));
-    nlb++;
+bit_sequence::word bit_sequence::reverse_word(word w) {
+  word rw = 0;
+  for (size_t i = 0; i < WORD_WIDTH; ++i, w >>= 1) {
+    rw = (rw << 1) | (w & 1);
   }
+  return rw;
 }
 
-void bit_sequence::append_word(bit_sequence::word w) {
-  if (bits.empty() || nlb == WORD_WIDTH) {
-    bits.push_back(w);
-    nlb = WORD_WIDTH;
+void bit_sequence::append_bit(uint8_t bit) {
+  assert(bit == 0 || bit == 1);
+  if (len % WORD_WIDTH == 0) {
+    bits.push_back(bit);
   } else {
-    bits.back() |= static_cast<word>(w >> nlb);
-    w <<= static_cast<uint8_t>(WORD_WIDTH - nlb);
-    bits.push_back(w);
+    bits.back() |= bit << (len % WORD_WIDTH);
   }
+  len++;
+}
+
+void bit_sequence::append_word(word w) {
+  if (len % WORD_WIDTH == 0) {
+    bits.push_back(w);
+  } else {
+    bits.back() |= w << (len % WORD_WIDTH);
+    bits.push_back(w >> (WORD_WIDTH - len % WORD_WIDTH));
+  }
+  len += WORD_WIDTH;
 }
 
 uint8_t bit_sequence::pop_back_bit() {
-  assert(!bits.empty());
-  uint8_t bit = static_cast<uint8_t>(bits.back() >>
-                                     static_cast<uint8_t>(WORD_WIDTH - nlb)) &
-                1U;
-  bits.back() ^=
-      static_cast<uint8_t>(bit << static_cast<uint8_t>(WORD_WIDTH - nlb));
-  nlb--;
-  if (nlb == 0) {
+  assert(len > 0);
+  uint8_t bit = bit_at(len - 1);
+  size_t pos = (len - 1) % WORD_WIDTH;
+  bits.back() &= (1 << pos) - 1;
+  if (pos == 0) {
     bits.pop_back();
-    if (!bits.empty()) {
-      nlb = WORD_WIDTH;
-    }
   }
+  len--;
   return bit;
 }
 
 bool operator==(const bit_sequence& a, const bit_sequence& b) {
-  return a.bits == b.bits && a.nlb == b.nlb;
+  return a.len == b.len && a.bits == b.bits;
 }
 bool operator!=(const bit_sequence& a, const bit_sequence& b) {
   return !(a == b);
 }
+
 size_t bit_sequence::size() const {
-  return (bits.empty() ? 0 : bits.size() - 1) * WORD_WIDTH + nlb;
+  return len;
 }

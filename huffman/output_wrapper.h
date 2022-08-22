@@ -8,6 +8,7 @@
 #include "bit_sequence.h"
 #include <climits>
 #include <ostream>
+
 struct output_wrapper {
   using word = bit_sequence::word;
 
@@ -24,6 +25,7 @@ private:
 
   output_wrapper& maybe_print();
   output_wrapper& flush();
+  void print(word w);
 };
 
 #endif // HUFFMAN_OUTPUT_WRAPPER_H

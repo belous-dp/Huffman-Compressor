@@ -25,7 +25,6 @@ struct encoder {
 
   void print_metadata(std::ostream& output) const;
 
-  std::vector<bit_sequence> get_codes(); // todo debug, remove
   void print_codes(std::ostream& output); // todo debug, remove
 
   void encode(std::istream& input, std::ostream& output) const;
@@ -50,8 +49,8 @@ private:
 
   node* tree;
 
-  friend void destroy_tree(node* root);
-  friend bool is_leaf(node* pNode);
+  static void destroy_tree(node* root);
+  static bool is_leaf(node* pNode);
 
   void build_codes(node* root, bit_sequence& cur);
   void print_tree(node* root, output_wrapper& out) const;

@@ -16,7 +16,7 @@ encoder::~encoder() {
   destroy_tree(tree);
 }
 
-void destroy_tree(encoder::node* root) {
+void encoder::destroy_tree(node* root) {
   if (root) {
     destroy_tree(root->left);
     destroy_tree(root->right);
@@ -25,7 +25,7 @@ void destroy_tree(encoder::node* root) {
   }
 }
 
-bool is_leaf(encoder::node* pNode) {
+bool encoder::is_leaf(node* pNode) {
   if (pNode->left != nullptr) {
     assert(pNode->right != nullptr);
     return false;
@@ -119,7 +119,7 @@ void encoder::build_codes(encoder::node* root, bit_sequence& cur) {
 void encoder::print_metadata(std::ostream& output) const {
   auto ow = output_wrapper(output);
   print_tree(tree, ow);
-  uint8_t len = 0;
+  size_t len = 0;
   for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
     len += frequency[i] * codes[i].size();
   }
@@ -153,13 +153,12 @@ void encoder::encode(std::istream& input, std::ostream& output) const {
   }
 }
 
-std::vector<bit_sequence> encoder::get_codes() {
-  return {codes.begin(), codes.end()};
-}
-
 void encoder::print_codes(std::ostream& output) {
   output << "codes = {\n";
   for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+    if (codes[i].size() == 0) {
+      continue;
+    }
     output << "  " << i << " [";
     for (size_t j = 0; j < codes[i].size(); ++j) {
       output << static_cast<uint16_t>(codes[i].bit_at(j));
@@ -167,4 +166,5 @@ void encoder::print_codes(std::ostream& output) {
     output << "]\n";
   }
   output << "}\n";
+  output.flush();
 }
