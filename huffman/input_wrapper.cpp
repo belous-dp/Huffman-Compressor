@@ -14,6 +14,12 @@ input_wrapper::input_wrapper(std::istream& input, uint8_t unused,
   assert(unused < bs::WORD_WIDTH);
 }
 
+input_wrapper::~input_wrapper() {
+//  std::cout << "fetch size = " << fetch_size << std::endl;
+//  std::cout << "cnt = " << cnt << std::endl;
+//  std::cout << "buf size = " << buf.size() << std::endl;
+}
+
 bool input_wrapper::has(size_t n) {
   if (buf_size() < n) {
     fetch(fetch_size);
@@ -30,12 +36,10 @@ void input_wrapper::fetch(size_t n) {
     return;
   }
   bit_sequence nbuf;
-  for (size_t i = pos; i + bs::WORD_WIDTH < buf.size(); ++i) {
+  for (size_t i = pos; i + bs::WORD_WIDTH <= buf.size(); i += bs::WORD_WIDTH) {
     nbuf.append_word(buf.word_at(i));
   }
-  for (size_t i = buf.size() < bs::WORD_WIDTH
-                    ? pos
-                    : std::max(buf.size() - bs::WORD_WIDTH, pos);
+  for (size_t i = buf.size() - (buf.size() - pos) % bs::WORD_WIDTH;
        i < buf.size(); ++i) {
     nbuf.append_bit(buf.bit_at(i));
   }

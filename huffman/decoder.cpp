@@ -65,10 +65,10 @@ void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
     return;
   } else {
     if (!iw.has()) {
-//      throw std::invalid_argument("invalid data");
-            output.flush();
-            std::cerr << "invalid data" << std::endl;
-            exit(1);
+      throw std::invalid_argument("invalid data");
+//            output.flush();
+//            std::cerr << "invalid data" << std::endl;
+//            exit(1);
     }
     if (iw.scan_bit() > 0) {
       decode_dfs(root->right, iw, output);

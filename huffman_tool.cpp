@@ -27,6 +27,9 @@ int main(int argc, char** argv) {
       throw std::invalid_argument("IOException: cannot open input/output files");
     }
     if (compress) {
+      if (decompress) {
+        throw std::invalid_argument("wrong arguments: compress and decompress at the same time is prohibited");
+      }
       encoder enc = encoder();
       enc.process_input(inp);
       enc.print_metadata(outp);

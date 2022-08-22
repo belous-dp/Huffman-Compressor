@@ -78,7 +78,7 @@ void encoder::build_tree() {
     return a->chr < b->chr;
   };
   std::priority_queue<node*, std::vector<node*>, decltype(compare)> q(compare); // todo maybe smart pointers?
-  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i <= bit_sequence::WORD_MAX_VAL; ++i) {
     if (frequency[i] > 0) {
       q.push(new node(i, frequency[i]));
     }
@@ -120,7 +120,7 @@ void encoder::print_metadata(std::ostream& output) const {
   auto ow = output_wrapper(output);
   print_tree(tree, ow);
   size_t len = 0;
-  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i <= bit_sequence::WORD_MAX_VAL; ++i) {
     len += frequency[i] * codes[i].size();
   }
   if (tree) {
@@ -155,7 +155,7 @@ void encoder::encode(std::istream& input, std::ostream& output) const {
 
 void encoder::print_codes(std::ostream& output) {
   output << "codes = {\n";
-  for (size_t i = 0; i < bit_sequence::WORD_MAX_VAL; ++i) {
+  for (size_t i = 0; i <= bit_sequence::WORD_MAX_VAL; ++i) {
     if (codes[i].size() == 0) {
       continue;
     }

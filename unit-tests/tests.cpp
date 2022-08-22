@@ -119,27 +119,6 @@ TEST(bit_sequence, pop_back) {
   EXPECT_TRUE(s.get_bits().empty());
 }
 
-//TEST(bit_sequence, wordCtor) {
-//  std::mt19937 gen(42);
-//  std::uniform_int_distribution<> rnd(0, cool_char::WORD_MAX_VAL);
-//  for (size_t i = 0; i < 100; ++i) {
-//    auto val = static_cast<cool_char::word>(rnd(gen));
-//    cool_char cc = cool_char(val, cool_char::WORD_WIDTH);
-//    EXPECT_EQ(cc.data, val);
-//    EXPECT_EQ(cc.nbits, cool_char::WORD_WIDTH);
-//  }
-//TEST(encoder, processOneChar) {
-//  std::vector<cool_sequence> correct(cool_char::WORD_MAX_VAL);
-//  for (cool_char::word i = 0; i < cool_char::WORD_MAX_VAL; ++i) {
-//    encoder enc = encoder();
-//    enc.collect_statistics(i);
-//    enc.build_tree();
-//    std::vector<cool_sequence> codes = enc.get_codes();
-//    correct[i].add_bit(1);
-//    EXPECT_THAT(codes, ::testing::ContainerEq(correct));
-//    correct[i].remove_bit();
-//  }
-
 std::string encode_decode(std::string const& s) {
   std::istringstream init_data_input(s);
   encoder enc = encoder();
@@ -152,7 +131,7 @@ std::string encode_decode(std::string const& s) {
   enc.print_metadata(compressed_data_output);
   enc.encode(init_data_input, compressed_data_output);
 
-  std::cout << "compressed data output: '" << compressed_data_output.str() << "'" << std::endl;
+//  std::cout << "compressed data output: '" << compressed_data_output.str() << "'" << std::endl;
 
   decoder dec = decoder();
   std::istringstream compressed_data_input(compressed_data_output.str());
@@ -350,15 +329,16 @@ TEST(correctness, englishRussian2) {
   EXPECT_EQ(s, encode_decode(s));
 }
 
-//TEST(correctness, random) {
-//  std::mt19937 gen(42);
-//  std::uniform_int_distribution<> chr(0, cool_char::WORD_MAX_VAL);
-//  for (size_t i = 0; i < 100; ++i) {
-//    auto val = static_cast<cool_char::word>(rnd(gen));
-//    cool_char cc = cool_char(val, cool_char::WORD_WIDTH);
-//    EXPECT_EQ(cc.data, val);
-//    EXPECT_EQ(cc.nbits, cool_char::WORD_WIDTH);
-//  }
-//  std::string s = "zzzzzzz";
-//  EXPECT_EQ(s, encode_decode(s));
-//}
+TEST(correctness, random) {
+  std::mt19937 gen(42);
+  std::uniform_int_distribution<> len_distr(0, 1000);
+  std::uniform_int_distribution<> word_distr(0, bit_sequence::WORD_MAX_VAL);
+  for (size_t i = 0; i < 100; ++i) {
+    std::string s;
+    size_t len = len_distr(gen);
+    for (size_t j = 0; j < len; ++j) {
+      s += static_cast<char>(word_distr(gen));
+    }
+    EXPECT_EQ(s, encode_decode(s));
+  }
+}

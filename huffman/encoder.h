@@ -34,8 +34,8 @@ private:
   void collect_statistics(word character);
   void build_tree();
 
-  std::array<bit_sequence, bit_sequence::WORD_MAX_VAL> codes;
-  std::array<size_t, bit_sequence::WORD_MAX_VAL> frequency;
+  std::array<bit_sequence, bit_sequence::WORD_MAX_VAL + 1> codes;
+  std::array<size_t, bit_sequence::WORD_MAX_VAL + 1> frequency;
 
   struct node {
     node* left;

@@ -46,7 +46,7 @@ output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
 }
 
 output_wrapper& output_wrapper::maybe_print() {
-  if (buf.size() > static_cast<size_t>(bs::WORD_WIDTH * 1024U)) {
+  if (buf.size() > BUF_SIZE) {
     for (size_t i = 0; i + bs::WORD_WIDTH <= buf.size(); i += bs::WORD_WIDTH) {
       print(buf.word_at(i));
     }
