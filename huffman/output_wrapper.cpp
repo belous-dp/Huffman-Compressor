@@ -22,7 +22,8 @@ output_wrapper& output_wrapper::flush() {
 }
 
 void output_wrapper::print(output_wrapper::word w) {
-  output << static_cast<char>(bs::reverse_word(w));
+//  output << static_cast<char>(bs::reverse_word(w));
+  output << static_cast<char>(w);
 }
 
 output_wrapper& output_wrapper::print_bit(uint8_t bit) {
