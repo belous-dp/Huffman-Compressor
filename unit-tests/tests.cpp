@@ -270,68 +270,9 @@ TEST(correctness, englishRussian4) {
   EXPECT_EQ(s, encode_decode(s));
 }
 
-TEST(correctness, englishRussian3) {
-  std::string s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                  "ccccccccccccccccccccccccccccccc"
-//                  "dddddddddddddddddddddddddddddd"
-                  "eeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-                  "ffffffffffffffffffffffffffff"
-                  "ggggggggggggggggggggggggggg"
-                  "hhhhhhhhhhhhh"
-                  "фффффффффффф"
-                  "ххххххххххх"
-                  "цццццццццц"
-                  "ччччччччч"
-                  "шшшшшшшш"
-                  "щщщщщщщ"
-                  "ъъъъъъ"
-                  "ыыыыы"
-                  "wwww"
-                  "z"
-                  "1"
-                  "2"
-                  "3"
-                  "4"
-                  "5"
-                  "6"
-                  "7";
-  EXPECT_EQ(s, encode_decode(s));
-}
-
-TEST(correctness, englishRussian2) {
-  std::string s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                  "ccccccccccccccccccccccccccccccc"
-                  "dddddddddddddddddddddddddddddd"
-                  "eeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-                  "ffffffffffffffffffffffffffff"
-                  "ggggggggggggggggggggggggggg"
-                  "hhhhhhhhhhhhh"
-                  "фффффффффффф"
-                  "ххххххххххх"
-                  "цццццццццц"
-                  "ччччччччч"
-                  "шшшшшшшш"
-                  "щщщщщщщ"
-                  "ъъъъъъ"
-                  "ыыыыы"
-                  "wwww"
-                  "xxx"
-                  "z"
-                  "1"
-                  "2"
-                  "3"
-                  "4"
-                  "5"
-                  "6"
-                  "7";
-  EXPECT_EQ(s, encode_decode(s));
-}
-
 TEST(correctness, random) {
   std::mt19937 gen(42);
-  std::uniform_int_distribution<> len_distr(0, 1000);
+  std::uniform_int_distribution<> len_distr(0, 10000);
   std::uniform_int_distribution<> word_distr(0, bit_sequence::WORD_MAX_VAL);
   for (size_t i = 0; i < 100; ++i) {
     std::string s;

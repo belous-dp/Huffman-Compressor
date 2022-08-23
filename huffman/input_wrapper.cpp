@@ -18,10 +18,10 @@ input_wrapper::~input_wrapper() = default;
 bool input_wrapper::fetch() {
 //  buf = bs::reverse_word(input.get());
   buf = input.get();
-  len = bs::WORD_WIDTH;
   if (!input) {
     return false;
   }
+  len = bs::WORD_WIDTH;
   if (eof()) {
     buf &= (1 << (bs::WORD_WIDTH - unused)) - 1;
     len -= unused;

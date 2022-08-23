@@ -38,12 +38,12 @@ output_wrapper& output_wrapper::print_word(word w) {
 
 output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
   for (size_t i = 0; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
-    print_word(bitseq.word_at(i));
+    buf.append_word(bitseq.word_at(i));
   }
   for (size_t i = bitseq.size() - bitseq.size() % bs::WORD_WIDTH; i < bitseq.size(); ++i) {
-    print_bit(bitseq.bit_at(i));
+    buf.append_bit(bitseq.bit_at(i));
   }
-  return *this;
+  return maybe_print();
 }
 
 output_wrapper& output_wrapper::maybe_print() {
