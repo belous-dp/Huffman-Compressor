@@ -8,17 +8,12 @@
 
 using bs = bit_sequence;
 
-output_wrapper::output_wrapper(std::ostream& output) : buf(BUF_SIZE), output(output) {}
+output_wrapper::output_wrapper(std::ostream& output) : buf(0), output(output), len(0) {}
 
 output_wrapper::~output_wrapper() {
-  flush();
-}
-
-output_wrapper& output_wrapper::flush() {
-  for (size_t i = 0; i < buf.size(); i += bs::WORD_WIDTH) {
-    print(buf.word_at(i));
+  if (len > 0) {
+    print(buf);
   }
-  return *this;
 }
 
 void output_wrapper::print(output_wrapper::word w) {
@@ -27,35 +22,34 @@ void output_wrapper::print(output_wrapper::word w) {
 }
 
 output_wrapper& output_wrapper::print_bit(uint8_t bit) {
-  buf.append_bit(bit);
-  return maybe_print();
+  buf |= bit << len;
+  len++;
+  if (len == bs::WORD_WIDTH) {
+    print(buf);
+    buf = 0;
+    len = 0;
+  }
+  return *this;
 }
 
 output_wrapper& output_wrapper::print_word(word w) {
-  buf.append_word(w);
-  return maybe_print();
+  if (len == 0) {
+    print(w);
+    return *this;
+  }
+  size_t left = bs::WORD_WIDTH - len;
+  print(buf | (w << len));
+  w >>= left;
+  buf = w;
+  return *this;
 }
 
 output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
   for (size_t i = 0; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
-    buf.append_word(bitseq.word_at(i));
+    print_word(bitseq.word_at(i));
   }
   for (size_t i = bitseq.size() - bitseq.size() % bs::WORD_WIDTH; i < bitseq.size(); ++i) {
-    buf.append_bit(bitseq.bit_at(i));
-  }
-  return maybe_print();
-}
-
-output_wrapper& output_wrapper::maybe_print() {
-  if (buf.size() > BUF_SIZE) {
-    for (size_t i = 0; i + bs::WORD_WIDTH <= buf.size(); i += bs::WORD_WIDTH) {
-      print(buf.word_at(i));
-    }
-    bit_sequence nbuf(BUF_SIZE);
-    for (size_t i = buf.size() - buf.size() % bs::WORD_WIDTH; i < buf.size(); ++i) {
-      nbuf.append_bit(buf.bit_at(i));
-    }
-    buf = nbuf;
+    print_bit(bitseq.bit_at(i));
   }
   return *this;
 }

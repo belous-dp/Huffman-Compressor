@@ -55,13 +55,13 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
       output << static_cast<char>(tree->chr);
     }
   }
-  try {
+//  try {
     while (iw) {
       decode_dfs(tree, iw, output);
     }
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument("invalid data");
-  }
+//  } catch (std::invalid_argument& e) {
+//    throw std::invalid_argument("invalid data");
+//  }
 }
 
 void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,

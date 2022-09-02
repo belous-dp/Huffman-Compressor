@@ -20,13 +20,11 @@ struct output_wrapper {
   output_wrapper& print_bit_sequence(bit_sequence const& bitseq);
 
 private:
-  static const size_t BUF_SIZE = bit_sequence::WORD_WIDTH * 512U;
 
-  bit_sequence buf;
+  word buf;
   std::ostream& output;
+  size_t len;
 
-  output_wrapper& maybe_print();
-  output_wrapper& flush();
   void print(word w);
 };
 

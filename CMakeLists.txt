@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(huffman)
 
-add_executable(tests unit-tests/tests.cpp)
+add_executable(tests integration-tests/tests.cpp)
 add_executable(huffman-tool huffman_tool.cpp)
 
 if (NOT MSVC)
