@@ -55,7 +55,7 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
       output << static_cast<char>(tree->chr);
     }
   }
-//  try {
+  try {
     while (iw) {
       encoder::node* v = tree;
       while (!encoder::is_leaf((v))) {
@@ -63,7 +63,7 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
       }
       output << static_cast<char>(v->chr);
     }
-//  } catch (std::invalid_argument& e) {
-//    throw std::invalid_argument("invalid data");
-//  }
+  } catch (std::invalid_argument& e) {
+    throw std::invalid_argument("invalid data");
+  }
 }

@@ -4,6 +4,7 @@
 
 #include "output_wrapper.h"
 
+#include <cassert>
 #include <cstddef>
 
 using bs = bit_sequence;
@@ -47,15 +48,24 @@ output_wrapper& output_wrapper::print_word(word w) {
 output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
   size_t i = 0;
   if (len > 0) {
-    for (; i < bs::WORD_WIDTH - len && i < bitseq.size(); ++i) {
-      print_bit(bitseq.bit_at(i));
+    word w = bitseq.word_at(i);
+    size_t wlen = i = std::min(bs::WORD_WIDTH - len, bitseq.size());
+    w &= (1 << i) - 1;
+    buf |= w << len;
+    if (len + wlen >= bs::WORD_WIDTH) {
+      print(buf);
+      buf = wlen > len ? w >> (wlen - len) : 0;
+      len -= bs::WORD_WIDTH;
     }
+    len += wlen;
   }
   for (; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
     print_word(bitseq.word_at(i));
   }
-  for (; i < bitseq.size(); ++i) {
-    print_bit(bitseq.bit_at(i));
+  if (i < bitseq.size()) {
+    assert(len == 0);
+    buf = bitseq.word_at(i);
+    len = bitseq.size() - i;
   }
   return *this;
 }
