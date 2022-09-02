@@ -45,10 +45,16 @@ output_wrapper& output_wrapper::print_word(word w) {
 }
 
 output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
-  for (size_t i = 0; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
+  size_t i = 0;
+  if (len > 0) {
+    for (; i < bs::WORD_WIDTH - len && i < bitseq.size(); ++i) {
+      print_bit(bitseq.bit_at(i));
+    }
+  }
+  for (; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
     print_word(bitseq.word_at(i));
   }
-  for (size_t i = bitseq.size() - bitseq.size() % bs::WORD_WIDTH; i < bitseq.size(); ++i) {
+  for (; i < bitseq.size(); ++i) {
     print_bit(bitseq.bit_at(i));
   }
   return *this;
