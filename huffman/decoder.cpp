@@ -57,23 +57,13 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
   }
 //  try {
     while (iw) {
-      decode_dfs(tree, iw, output);
+      encoder::node* v = tree;
+      while (!encoder::is_leaf((v))) {
+        v = iw.scan_bit() > 0 ? v->right : v->left;
+      }
+      output << static_cast<char>(v->chr);
     }
 //  } catch (std::invalid_argument& e) {
 //    throw std::invalid_argument("invalid data");
 //  }
-}
-
-void decoder::decode_dfs(encoder::node* root, input_wrapper& iw,
-                         std::ostream& output) const {
-  if (encoder::is_leaf(root)) {
-    output << static_cast<char>(root->chr);
-    return;
-  } else {
-    if (iw.scan_bit() > 0) {
-      decode_dfs(root->right, iw, output);
-    } else {
-      decode_dfs(root->left, iw, output);
-    }
-  }
 }
