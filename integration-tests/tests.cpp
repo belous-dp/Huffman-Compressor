@@ -124,7 +124,7 @@ std::string encode_decode(std::string const& s) {
   encoder enc = encoder();
   enc.process_input(init_data_input);
 
-  enc.print_codes(std::cout);
+//  enc.print_codes(std::cout);
 
   init_data_input = std::istringstream(s);
   std::ostringstream compressed_data_output;

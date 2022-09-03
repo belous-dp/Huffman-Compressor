@@ -18,7 +18,6 @@ output_wrapper::~output_wrapper() {
 }
 
 void output_wrapper::print(output_wrapper::word w) {
-//  output << static_cast<char>(bs::reverse_word(w));
   output << static_cast<char>(w);
 }
 
@@ -46,26 +45,27 @@ output_wrapper& output_wrapper::print_word(word w) {
 }
 
 output_wrapper& output_wrapper::print_bit_sequence(bit_sequence const& bitseq) {
-  size_t i = 0;
+  size_t i = 0, sz = bitseq.size();
   if (len > 0) {
     word w = bitseq.word_at(i);
-    size_t wlen = i = std::min(bs::WORD_WIDTH - len, bitseq.size());
-    w &= (1 << i) - 1;
     buf |= w << len;
-    if (len + wlen >= bs::WORD_WIDTH) {
+    if (sz < bs::WORD_WIDTH - len) {
+      i = sz;
+      len += sz;
+    } else {
+      i = bs::WORD_WIDTH - len;
       print(buf);
-      buf = wlen > len ? w >> (wlen - len) : 0;
-      len -= bs::WORD_WIDTH;
+      buf = 0;
+      len = 0;
     }
-    len += wlen;
   }
-  for (; i + bs::WORD_WIDTH <= bitseq.size(); i += bs::WORD_WIDTH) {
+  for (; i + bs::WORD_WIDTH <= sz; i += bs::WORD_WIDTH) {
     print_word(bitseq.word_at(i));
   }
-  if (i < bitseq.size()) {
+  if (i < sz) {
     assert(len == 0);
     buf = bitseq.word_at(i);
-    len = bitseq.size() - i;
+    len = sz - i;
   }
   return *this;
 }

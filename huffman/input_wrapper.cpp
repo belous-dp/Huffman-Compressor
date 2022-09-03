@@ -16,7 +16,6 @@ input_wrapper::input_wrapper(std::istream& input, uint8_t unused)
 input_wrapper::~input_wrapper() = default;
 
 bool input_wrapper::fetch() {
-//  buf = bs::reverse_word(input.get());
   buf = input.get();
   if (!input) {
     return false;

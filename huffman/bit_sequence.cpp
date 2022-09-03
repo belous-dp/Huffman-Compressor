@@ -35,7 +35,7 @@ bit_sequence::word bit_sequence::word_at(size_t index) const {
   size_t id = index / WORD_WIDTH;
   size_t pos = index % WORD_WIDTH;
   word res = bits[id] >> pos;
-  if (id + 1 < bits.size()) {
+  if (pos && id + 1 < bits.size()) {
     res |= bits[id + 1] << (WORD_WIDTH - pos);
   }
   return res;
