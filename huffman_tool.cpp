@@ -10,14 +10,14 @@
 
 int main(int argc, char** argv) {
   args::ArgumentParser parser(
-      "Tool for compressing and decompressing files with Huffman coding.",
+      "Tool for compressing and decompressing files with Huffman coding. Files sizes may exceed the memory size.",
       "Author: Danila Belous.");
   args::HelpFlag help(parser, "help", "Display this help menu", {'h', "help"});
-  args::Flag compress(parser, "compress", "compress mode", {'c', "compress"});
-  args::Flag decompress(parser, "decompress", "decompress mode",
+  args::Flag compress(parser, "compress", "Compress mode", {'c', "compress"});
+  args::Flag decompress(parser, "decompress", "Decompress mode",
                         {'d', "decompress"});
-  args::ValueFlag<std::string> input(parser, "path", "", {"input"});
-  args::ValueFlag<std::string> output(parser, "path", "", {"output"});
+  args::ValueFlag<std::string> input(parser, "path", "Path to the input file.", {"input"});
+  args::ValueFlag<std::string> output(parser, "path", "Path to the output file.", {"output"});
   try {
     parser.ParseCLI(argc, argv);
     std::ifstream inp = std::ifstream(args::get(input));
