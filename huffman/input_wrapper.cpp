@@ -24,8 +24,8 @@ bool input_wrapper::fetch() {
   }
   len = bs::WORD_WIDTH;
   if (eof()) {
-    buf &= (1 << (bs::WORD_WIDTH - unused)) - 1;
     len -= unused;
+    buf &= (1 << len) - 1;
   }
   return true;
 }

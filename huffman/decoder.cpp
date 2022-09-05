@@ -55,15 +55,11 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
       output << static_cast<char>(tree->chr);
     }
   }
-  try {
-    while (iw) {
-      encoder::node* v = tree;
-      while (!encoder::is_leaf((v))) {
-        v = iw.scan_bit() > 0 ? v->right : v->left;
-      }
-      output << static_cast<char>(v->chr);
+  while (iw) {
+    encoder::node* v = tree;
+    while (!encoder::is_leaf((v))) {
+      v = iw.scan_bit() > 0 ? v->right : v->left;
     }
-  } catch (std::ios_base::failure& e) {
-    throw std::invalid_argument("invalid data" + std::string(e.what()));
+    output << static_cast<char>(v->chr);
   }
 }
