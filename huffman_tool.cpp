@@ -21,9 +21,13 @@ int main(int argc, char** argv) {
   try {
     parser.ParseCLI(argc, argv);
     std::ifstream inp = std::ifstream(args::get(input));
+    if (!inp) {
+      throw std::ios_base::failure("cannot open input file");
+    }
     std::ofstream outp = std::ofstream(args::get(output));
-    if (!inp || !outp) {
-      throw std::invalid_argument("IOException: cannot open input/output files");
+    outp.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    if (!outp) {
+      throw std::ios_base::failure("cannot open output file");
     }
     if (compress) {
       if (decompress) {
@@ -35,7 +39,7 @@ int main(int argc, char** argv) {
       inp.close();
       inp = std::ifstream(args::get(input));
       if (!inp) {
-        throw std::invalid_argument("IOException");
+        throw std::ios_base::failure("cannot open input file");
       }
       enc.encode(inp, outp);
     } else {
@@ -43,14 +47,15 @@ int main(int argc, char** argv) {
       dec.process_metadata(inp);
       dec.decode(inp, outp);
     }
-    inp.close();
-    outp.close();
   } catch (args::Help& e) {
     std::cout << parser;
   } catch (args::Error& e) {
     std::cerr << e.what() << std::endl << parser;
     return 1;
   } catch (std::invalid_argument& e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
+  } catch (std::runtime_error& e) {
     std::cerr << e.what() << std::endl;
     return 1;
   }

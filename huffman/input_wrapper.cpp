@@ -17,8 +17,10 @@ input_wrapper::~input_wrapper() = default;
 
 bool input_wrapper::fetch() {
   buf = input.get();
-  if (!input) {
+  if (input.eof()) {
     return false;
+  } else if (!input) {
+    throw std::ios_base::failure("input error occurred");
   }
   len = bs::WORD_WIDTH;
   if (eof()) {
@@ -33,7 +35,7 @@ bool input_wrapper::eof() {
 }
 
 void error() {
-  throw std::invalid_argument("bad input request");
+  throw std::ios_base::failure("bad input request: not enough characters");
 }
 
 uint8_t input_wrapper::scan_bit() {

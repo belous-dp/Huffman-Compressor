@@ -19,15 +19,15 @@ void decoder::process_metadata(std::istream& input) {
   if (iw) {
     try {
       build_tree_dfs(tree, iw);
-    } catch (std::invalid_argument& e) {
-      throw std::invalid_argument("metadata corrupted: invalid tree");
+    } catch (std::ios_base::failure& e) {
+      throw std::runtime_error("metadata corrupted: invalid tree");
     }
     try {
       unused = iw.scan_bit();
       unused |= iw.scan_bit() << 1;
       unused |= iw.scan_bit() << 2;
-    } catch (std::invalid_argument& e) {
-      throw std::invalid_argument("metadata corrupted: wrong number of unused bits");
+    } catch (std::ios_base::failure& e) {
+      throw std::runtime_error("metadata corrupted: wrong number of unused bits");
     }
   }
 }
@@ -63,7 +63,7 @@ void decoder::decode(std::istream& input, std::ostream& output) const {
       }
       output << static_cast<char>(v->chr);
     }
-  } catch (std::invalid_argument& e) {
-    throw std::invalid_argument("invalid data");
+  } catch (std::ios_base::failure& e) {
+    throw std::invalid_argument("invalid data" + std::string(e.what()));
   }
 }

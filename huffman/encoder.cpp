@@ -56,11 +56,26 @@ void encoder::process_input(std::istream& input) {
   build_tree();
 }
 
+static void print_ios_state(std::istream& s) {
+  std::cout << ((s.rdstate() & std::istream::goodbit) != 0) <<
+      ((s.rdstate() & std::istream::eofbit) != 0) <<
+      ((s.rdstate() & std::istream::failbit) != 0) <<
+      ((s.rdstate() & std::istream::badbit) != 0) << std::endl;
+}
+
 void encoder::collect_statistics(std::istream& input) {
-  while (input) {
+//  print_ios_state(input);
+  while (!input.eof()) {
+//    print_ios_state(input);
+//    std::cout << "b" << std::endl;
     word w = input.get();
+//    std::cout << static_cast<int>(w) << std::endl;
+//    std::cout << static_cast<int>(std::char_traits<char>::eof()) << std::endl;
+//    print_ios_state(input);
     if (input) {
       collect_statistics(w);
+    } else if (!input.eof()) {
+      throw std::ios_base::failure("input error occurred while processing input");
     }
   }
 }
@@ -144,11 +159,18 @@ void encoder::print_tree(encoder::node* root, output_wrapper& out) const {
 }
 
 void encoder::encode(std::istream& input, std::ostream& output) const {
+//  std::cout << "encode" << std::endl;
   output_wrapper ow = output_wrapper(output);
-  while (input) {
+//  print_ios_state(input);
+  while (!input.eof()) {
+//    print_ios_state(input);
     word w = input.get();
+//    print_ios_state(input);
+//    std::cout << "a" << std::endl;
     if (input) {
       ow.print_bit_sequence(codes[w]);
+    } else if (!input.eof()) {
+      throw std::ios_base::failure("input error occurred while encoding");
     }
   }
 }
