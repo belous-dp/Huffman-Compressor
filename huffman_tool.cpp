@@ -36,6 +36,7 @@ int main(int argc, char** argv) {
       encoder enc = encoder();
       enc.process_input(inp);
       enc.print_metadata(outp);
+      inp.clear();
       inp.seekg(0);
       enc.encode(inp, outp);
     } else {
