@@ -36,11 +36,7 @@ int main(int argc, char** argv) {
       encoder enc = encoder();
       enc.process_input(inp);
       enc.print_metadata(outp);
-      inp.close();
-      inp = std::ifstream(args::get(input));
-      if (!inp) {
-        throw std::ios_base::failure("cannot open input file");
-      }
+      inp.seekg(0);
       enc.encode(inp, outp);
     } else {
       decoder dec = decoder();
